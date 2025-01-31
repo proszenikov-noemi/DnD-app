@@ -1,9 +1,9 @@
 {
-  "name": "LaughingShadows",
+  "name": "DnD-app",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "homepage": "https://proszenikov-noemi.github.io/LaughingShadows",
+  "homepage": "https://proszenikov-noemi.github.io/DnD-app",
   "scripts": {
     "dev": "vite",
     "start": "vite --open",
@@ -20,6 +20,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.4.2",
     "@mui/material": "^6.4.2",
     "firebase": "^11.2.0",
     "react": "^18.2.0",

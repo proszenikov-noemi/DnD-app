@@ -5,6 +5,8 @@ import LoginPage from './modules/Auth/LoginPage';
 import RegisterPage from './modules/Auth/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import CharacterSheetPage from './pages/CharacterSheetPage';
+import InventoryPage from './pages/InventoryPage';
+import CombatPage from './pages/CombatPage'; // ÚJ!
 
 const AppRoutes: React.FC = () => {
   return (
@@ -14,6 +16,8 @@ const AppRoutes: React.FC = () => {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/character-sheet" element={<CharacterSheetPage />} />
+      <Route path="/inventory" element={<InventoryPage />} />
+      <Route path="/combat" element={<CombatPage />} /> {/* 🔹 ÚJ */}
     </Routes>
   );
 };

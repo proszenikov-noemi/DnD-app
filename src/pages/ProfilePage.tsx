@@ -6,7 +6,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Container, Typography, Box, Button, Paper } from '@mui/material';
 
 const ProfilePage: React.FC = () => {
-  const [userData, setUserData] = useState<{ username?: string; email?: string } | null>(null);
+  const [userData, setUserData] = useState<{ username?: string } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,7 +16,7 @@ const ProfilePage: React.FC = () => {
           const userRef = doc(db, 'users', user.uid);
           const userSnap = await getDoc(userRef);
           if (userSnap.exists()) {
-            setUserData(userSnap.data() as { username?: string; email?: string });
+            setUserData(userSnap.data() as { username?: string });
           } else {
             console.error("A felhasználói adatok nem találhatók az adatbázisban!");
           }
@@ -39,21 +39,58 @@ const ProfilePage: React.FC = () => {
   return (
     <Container maxWidth="sm">
       <Paper elevation={6} sx={{ padding: 4, backgroundColor: 'background.paper', textAlign: 'center' }}>
-        <Typography variant="h1">Profil</Typography>
+        {/* A "Profil" helyett a felhasználó neve, nagyobb méretben és fantasy betűtípussal */}
+        <Typography
+          variant="h3"
+          gutterBottom
+          sx={{ fontFamily: 'MedievalSharp, serif', fontSize: '36px', fontWeight: 'bold' }}
+        >
+          {userData?.username || 'Felhasználó'}
+        </Typography>
+
         {userData ? (
           <Box sx={{ textAlign: 'center', marginTop: 3 }}>
-            <Typography variant="h2">Név: {userData.username || 'Nincs név'}</Typography>
-            <Typography variant="body1">Email: {userData.email || 'Nincs email'}</Typography>
-
-            {/* Karakterlap gomb */}
-            <Button component={Link} to="/character-sheet" variant="contained" color="secondary" sx={{ marginTop: 3 }}>
-              Karakterlap Megtekintése
-            </Button>
-
-            {/* Kijelentkezés gomb */}
-            <Button onClick={handleLogout} variant="contained" color="primary" sx={{ marginTop: 2 }}>
-              Kijelentkezés
-            </Button>
+            {/* Gombok oszlopos elrendezése, fix szélességgel */}
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              gap={2}
+              sx={{ '& > *': { width: '200px' } }} // Fix szélesség minden gombra
+            >
+              
+              <Button
+                component={Link}
+                to="/character-sheet"
+                variant="contained"
+                color="secondary"
+              >
+                Karakterlap
+              </Button>
+              <Button
+                component={Link}
+                to="/inventory"
+                variant="contained"
+                color="secondary"
+              >
+                Inventory
+              </Button>
+              <Button
+                component={Link}
+                to="/combat" // Ellenőrizd, hogy ez valóban "/combat"
+                variant="contained"
+                color="error" // Piros szín, hogy kiemelkedjen
+              >
+                Harc
+              </Button>
+              <Button
+                onClick={handleLogout}
+                variant="contained"
+                color="primary"
+              >
+                Kijelentkezés
+              </Button>
+            </Box>
           </Box>
         ) : (
           <Typography variant="body1">Adatok betöltése...</Typography>
