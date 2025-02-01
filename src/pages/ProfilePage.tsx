@@ -58,7 +58,6 @@ const ProfilePage: React.FC = () => {
               gap={2}
               sx={{ '& > *': { width: '200px' } }} // Fix szélesség minden gombra
             >
-              
               <Button
                 component={Link}
                 to="/character-sheet"
@@ -77,11 +76,19 @@ const ProfilePage: React.FC = () => {
               </Button>
               <Button
                 component={Link}
-                to="/combat" // Ellenőrizd, hogy ez valóban "/combat"
+                to="/combat"
                 variant="contained"
-                color="error" // Piros szín, hogy kiemelkedjen
+                color="error"
               >
                 Harc
+              </Button>
+              <Button
+                component={Link}
+                to="/team" // Csapattagok oldal
+                variant="contained"
+                color="primary"
+              >
+                Csapattagok
               </Button>
               <Button
                 onClick={handleLogout}
