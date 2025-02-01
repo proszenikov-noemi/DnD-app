@@ -26,7 +26,7 @@ const App: React.FC = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <div>
-        <AppRoutes user={user} />
+        <AppRoutes user={user} /> {/* ✅ Most az AppRoutes megkapja a user állapotot */}
       </div>
     </ThemeProvider>
   );
