@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Typography, Paper, Box, Button, TextField, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { db, auth } from '../firebase';
-import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, updateDoc } from 'firebase/firestore';
 
 interface TeamMember {
   id: string;
@@ -10,20 +10,24 @@ interface TeamMember {
   race: string;
   class: string;
   hp: number;
+  createdBy: string; // 🔹 Azonosító, hogy ki hozta létre a kártyát
 }
 
 const TeamPage: React.FC = () => {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [open, setOpen] = useState(false);
+  const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [newMember, setNewMember] = useState<TeamMember>({
     id: '',
     name: '',
     race: '',
     class: '',
-    hp: 0
+    hp: 0,
+    createdBy: ''
   });
 
   const navigate = useNavigate();
+  const currentUser = auth.currentUser;
 
   useEffect(() => {
     const fetchTeam = async () => {
@@ -35,20 +39,42 @@ const TeamPage: React.FC = () => {
     fetchTeam();
   }, []);
 
-  const handleOpenDialog = () => setOpen(true);
-  const handleCloseDialog = () => setOpen(false);
+  const handleOpenDialog = (member?: TeamMember) => {
+    if (member) {
+      setEditingMember(member); // 🔹 Szerkesztés módba lépés
+      setNewMember(member);
+    } else {
+      setEditingMember(null);
+      setNewMember({ id: '', name: '', race: '', class: '', hp: 0, createdBy: currentUser?.uid || '' });
+    }
+    setOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpen(false);
+    setEditingMember(null);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMember({ ...newMember, [e.target.name]: e.target.value });
   };
 
-  const handleAddMember = async () => {
+  const handleSaveMember = async () => {
     if (!newMember.name || !newMember.race || !newMember.class || newMember.hp <= 0) return;
 
-    const teamRef = collection(db, 'team');
-    const docRef = await addDoc(teamRef, newMember);
-    setTeamMembers([...teamMembers, { ...newMember, id: docRef.id }]);
-    setNewMember({ id: '', name: '', race: '', class: '', hp: 0 });
+    if (editingMember) {
+      // 🔹 LÉTEZŐ karakter szerkesztése
+      const memberRef = doc(db, 'team', editingMember.id);
+      await updateDoc(memberRef, newMember);
+      setTeamMembers(teamMembers.map(m => (m.id === editingMember.id ? { ...newMember, id: m.id } : m)));
+    } else {
+      // 🔹 ÚJ karakter hozzáadása
+      const teamRef = collection(db, 'team');
+      const docRef = await addDoc(teamRef, { ...newMember, createdBy: currentUser?.uid });
+      setTeamMembers([...teamMembers, { ...newMember, id: docRef.id }]);
+    }
+
+    setNewMember({ id: '', name: '', race: '', class: '', hp: 0, createdBy: '' });
     handleCloseDialog();
   };
 
@@ -75,22 +101,27 @@ const TeamPage: React.FC = () => {
             <Typography variant="body1">Faj: {member.race}</Typography>
             <Typography variant="body1">Kaszt: {member.class}</Typography>
             <Typography variant="body1">HP: {member.hp}</Typography>
+            {currentUser?.uid === member.createdBy && (
+              <Button variant="outlined" color="primary" onClick={() => handleOpenDialog(member)}>
+                Szerkesztés
+              </Button>
+            )}
           </Paper>
         ))}
       </Box>
       
-      {/* Csak a bejelentkezett felhasználó láthatja */}
-      {auth.currentUser && (
+      {/* Csak a bejelentkezett felhasználó hozhat létre új karaktert */}
+      {currentUser && (
         <Box sx={{ marginTop: 4 }}>
-          <Button variant="contained" color="primary" onClick={handleOpenDialog}>
+          <Button variant="contained" color="primary" onClick={() => handleOpenDialog()}>
             Új csapattag hozzáadása
           </Button>
         </Box>
       )}
 
-      {/* Új csapattag hozzáadása dialógus */}
+      {/* Új csapattag hozzáadása/szerkesztése dialógus */}
       <Dialog open={open} onClose={handleCloseDialog}>
-        <DialogTitle>Új csapattag hozzáadása</DialogTitle>
+        <DialogTitle>{editingMember ? "Csapattag szerkesztése" : "Új csapattag hozzáadása"}</DialogTitle>
         <DialogContent>
           <TextField label="Név" name="name" fullWidth margin="dense" value={newMember.name} onChange={handleInputChange} />
           <TextField label="Faj" name="race" fullWidth margin="dense" value={newMember.race} onChange={handleInputChange} />
@@ -101,8 +132,8 @@ const TeamPage: React.FC = () => {
           <Button onClick={handleCloseDialog} color="secondary">
             Mégse
           </Button>
-          <Button onClick={handleAddMember} color="primary">
-            Hozzáadás
+          <Button onClick={handleSaveMember} color="primary">
+            {editingMember ? "Mentés" : "Hozzáadás"}
           </Button>
         </DialogActions>
       </Dialog>
