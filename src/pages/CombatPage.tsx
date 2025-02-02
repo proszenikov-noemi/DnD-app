@@ -29,13 +29,12 @@ const CombatPage: React.FC = () => {
 
   useEffect(() => {
     const fetchCombatants = async () => {
-      try {
-        const combatRef = collection(db, 'combat'); // 🔹 Közös adatbázis
-        const snapshot = await getDocs(combatRef);
-        const members = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Combatant));
-        setCombatants(members);
-      } catch (error) {
-        console.error("🔥 Hiba történt a Firestore adatlekérés során:", error);
+      if (auth.currentUser) {
+        const combatRef = doc(db, 'combat', auth.currentUser.uid);
+        const combatSnap = await getDoc(combatRef);
+        if (combatSnap.exists()) {
+          setCombatants(combatSnap.data().combatants || []);
+        }
       }
     };
     fetchCombatants();
