@@ -1,104 +1,97 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Paper, Button, TextField, Box, Select, MenuItem, IconButton } from '@mui/material';
+import { Container, Typography, Paper, Button, TextField, Box, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import { useNavigate } from 'react-router-dom';
-import { db, auth } from '../firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from '../firebase';
+import { collection, addDoc, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 
 interface Combatant {
-  id: number;
+  id: string;
   name: string;
   battleOrder: number;
   hp: number;
-  statusEffects: string[];
   color: string;
 }
-
-const STATUS_EFFECTS = [
-  "Blinded", "Charmed", "Deafened", "Exhaustion", "Frightened",
-  "Grappled", "Incapacitated", "Invisible", "Paralyzed", "Petrified",
-  "Poisoned", "Prone", "Restrained", "Stunned", "Unconscious"
-];
 
 const CombatPage: React.FC = () => {
   const [combatants, setCombatants] = useState<Combatant[]>([]);
   const [newCombatant, setNewCombatant] = useState({ name: '', battleOrder: '', hp: '', color: '#000000' });
-  const [selectedStatus, setSelectedStatus] = useState<string>('');
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCombatants = async () => {
-      if (auth.currentUser) {
-        const combatRef = doc(db, 'combat', auth.currentUser.uid);
-        const combatSnap = await getDoc(combatRef);
-        if (combatSnap.exists()) {
-          setCombatants(combatSnap.data().combatants || []);
-        }
+      try {
+        const combatRef = collection(db, 'combatants');
+        const snapshot = await getDocs(combatRef);
+        const combatantsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Combatant));
+
+        // **Csökkenő sorrendben rendezzük a battleOrder alapján**
+        setCombatants(combatantsData.sort((a, b) => b.battleOrder - a.battleOrder));
+      } catch (error) {
+        console.error('❌ Hiba történt a kártyák betöltésekor:', error);
       }
     };
     fetchCombatants();
   }, []);
 
-  const saveCombatantsToFirestore = async (updatedCombatants: Combatant[]) => {
-    if (auth.currentUser) {
-      await setDoc(doc(db, 'combat', auth.currentUser.uid), { combatants: updatedCombatants });
+  const handleAddCombatant = async () => {
+    if (!newCombatant.name || isNaN(parseInt(newCombatant.battleOrder)) || isNaN(parseInt(newCombatant.hp))) return;
+
+    try {
+      const combatRef = collection(db, 'combatants');
+      const docRef = await addDoc(combatRef, {
+        name: newCombatant.name,
+        battleOrder: parseInt(newCombatant.battleOrder, 10),
+        hp: parseInt(newCombatant.hp, 10),
+        color: newCombatant.color,
+      });
+
+      const newEntry: Combatant = {
+        id: docRef.id,
+        name: newCombatant.name,
+        battleOrder: parseInt(newCombatant.battleOrder, 10),
+        hp: parseInt(newCombatant.hp, 10),
+        color: newCombatant.color,
+      };
+
+      // **Új kártyát hozzáadunk és rendezzük az initiative alapján**
+      setCombatants((prevCombatants) => [...prevCombatants, newEntry].sort((a, b) => b.battleOrder - a.battleOrder));
+
+      setNewCombatant({ name: '', battleOrder: '', hp: '', color: '#000000' });
+    } catch (error) {
+      console.error('❌ Hiba történt kártya hozzáadásakor:', error);
     }
   };
 
-  const handleAddCombatant = () => {
-    if (!newCombatant.name || !newCombatant.battleOrder || !newCombatant.hp) return;
-
-    const newEntry: Combatant = {
-      id: Date.now(),
-      name: newCombatant.name,
-      battleOrder: parseInt(newCombatant.battleOrder, 10),
-      hp: parseInt(newCombatant.hp, 10),
-      statusEffects: [],
-      color: newCombatant.color,
-    };
-
-    const updatedCombatants = [...combatants, newEntry].sort((a, b) => b.battleOrder - a.battleOrder);
-    setCombatants(updatedCombatants);
-    saveCombatantsToFirestore(updatedCombatants);
-    setNewCombatant({ name: '', battleOrder: '', hp: '', color: '#000000' });
+  const handleDeleteCombatant = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, 'combatants', id));
+      setCombatants(combatants.filter(c => c.id !== id));
+    } catch (error) {
+      console.error('❌ Hiba történt a kártya törlésekor:', error);
+    }
   };
 
-  const handleDeleteCombatant = (id: number) => {
-    const updatedCombatants = combatants.filter(c => c.id !== id);
-    setCombatants(updatedCombatants);
-    saveCombatantsToFirestore(updatedCombatants);
-  };
+  const handleUpdateHP = async (id: string, amount: number) => {
+    try {
+      const updatedCombatants = combatants.map((c) =>
+        c.id === id ? { ...c, hp: Math.max(0, c.hp + amount) } : c
+      );
+      setCombatants(updatedCombatants);
 
-  const handleUpdateHP = (id: number, amount: number) => {
-    const updatedCombatants = combatants.map(c =>
-      c.id === id ? { ...c, hp: Math.max(0, c.hp + amount) } : c
-    );
-    setCombatants(updatedCombatants);
-    saveCombatantsToFirestore(updatedCombatants);
-  };
-
-  const handleAddStatusEffect = (id: number) => {
-    if (!selectedStatus) return;
-    const updatedCombatants = combatants.map(c =>
-      c.id === id ? { ...c, statusEffects: [...new Set([...c.statusEffects, selectedStatus])] } : c
-    );
-    setCombatants(updatedCombatants);
-    saveCombatantsToFirestore(updatedCombatants);
-  };
-
-  const handleRemoveStatusEffect = (id: number, effect: string) => {
-    const updatedCombatants = combatants.map(c =>
-      c.id === id ? { ...c, statusEffects: c.statusEffects.filter(e => e !== effect) } : c
-    );
-    setCombatants(updatedCombatants);
-    saveCombatantsToFirestore(updatedCombatants);
+      const combatantToUpdate = updatedCombatants.find(c => c.id === id);
+      if (combatantToUpdate) {
+        const combatRef = doc(db, 'combatants', id);
+        await updateDoc(combatRef, { hp: combatantToUpdate.hp });
+      }
+    } catch (error) {
+      console.error('❌ Hiba történt a HP frissítésekor:', error);
+    }
   };
 
   return (
     <Container maxWidth="md">
       <Paper elevation={6} sx={{ padding: 4, backgroundColor: 'background.paper', textAlign: 'center', position: 'relative' }}>
-        {/* Vissza gomb a bal felső sarokban */}
         <Button
           variant="outlined"
           color="secondary"
@@ -112,63 +105,60 @@ const CombatPage: React.FC = () => {
           Harc
         </Typography>
 
-        <Box display="flex" flexDirection="column" gap={2} alignItems="center">
-          <TextField label="Név" value={newCombatant.name} onChange={(e) => setNewCombatant({ ...newCombatant, name: e.target.value })} />
-          <TextField label="Harci sorrend" type="number" value={newCombatant.battleOrder} onChange={(e) => setNewCombatant({ ...newCombatant, battleOrder: e.target.value })} />
-          <TextField label="Életpont (HP)" type="number" value={newCombatant.hp} onChange={(e) => setNewCombatant({ ...newCombatant, hp: e.target.value })} />
-          <input type="color" value={newCombatant.color} onChange={(e) => setNewCombatant({ ...newCombatant, color: e.target.value })} />
-          <Button variant="contained" color="primary" onClick={handleAddCombatant} sx={{ width: '150px' }}>
-            Hozzáadás
+        <Box display="flex" flexDirection="column" alignItems="center" gap={2} sx={{ marginBottom: 4 }}>
+          <TextField
+            label="Név"
+            value={newCombatant.name}
+            onChange={(e) => setNewCombatant({ ...newCombatant, name: e.target.value })}
+          />
+          <TextField
+            label="Harci sorrend"
+            type="number"
+            value={newCombatant.battleOrder}
+            onChange={(e) => setNewCombatant({ ...newCombatant, battleOrder: e.target.value })}
+          />
+          <TextField
+            label="Életpont (HP)"
+            type="number"
+            value={newCombatant.hp}
+            onChange={(e) => setNewCombatant({ ...newCombatant, hp: e.target.value })}
+          />
+          <input
+            type="color"
+            value={newCombatant.color}
+            onChange={(e) => setNewCombatant({ ...newCombatant, color: e.target.value })}
+          />
+          <Button variant="contained" color="primary" onClick={handleAddCombatant}>
+            Kártya Hozzáadása
           </Button>
         </Box>
 
-        <Box sx={{ marginTop: 3, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 3 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 3 }}>
           {combatants.map((c) => (
-            <Paper 
-              key={c.id} 
-              elevation={4} 
-              sx={{ padding: 2, textAlign: 'center', position: 'relative', border: `3px solid ${c.color}` }}
-            >
-              {/* Karakter törlése gomb a jobb felső sarokban */}
-              <IconButton edge="end" onClick={() => handleDeleteCombatant(c.id)} sx={{ position: 'absolute', top: 5, right: 5 }}>
+            <Paper key={c.id} elevation={4} sx={{ padding: 2, textAlign: 'center', border: `3px solid ${c.color}`, position: 'relative' }}>
+              {/* Kártya törlése ikon */}
+              <IconButton
+                edge="end"
+                onClick={() => handleDeleteCombatant(c.id)}
+                sx={{ position: 'absolute', top: 5, right: 5 }}
+              >
                 <DeleteIcon />
               </IconButton>
 
-              <Typography variant="h4" sx={{ fontFamily: 'MedievalSharp, serif' }}>
+              <Typography variant="h4">
                 {c.battleOrder} - {c.name}
               </Typography>
-
-              <Typography variant="h5" color="primary" sx={{ marginY: 1 }}>
+              <Typography variant="h5" color="primary">
                 HP: {c.hp}
               </Typography>
-
-              <Button variant="outlined" color="secondary" onClick={() => handleUpdateHP(c.id, -1)}>
-                -1 HP
-              </Button>
-              <Button variant="outlined" color="secondary" onClick={() => handleUpdateHP(c.id, +1)}>
-                +1 HP
-              </Button>
-
-              <Box>
-                {c.statusEffects.map(effect => (
-                  <Box key={effect} display="flex" alignItems="center" justifyContent="center">
-                    <Typography variant="body2">{effect}</Typography>
-                    <IconButton size="small" onClick={() => handleRemoveStatusEffect(c.id, effect)}>
-                      <RemoveCircleIcon fontSize="small" color="error" />
-                    </IconButton>
-                  </Box>
-                ))}
+              <Box display="flex" justifyContent="center" gap={2} sx={{ marginTop: 2 }}>
+                <Button variant="outlined" color="secondary" onClick={() => handleUpdateHP(c.id, -1)}>
+                  -1 HP
+                </Button>
+                <Button variant="outlined" color="primary" onClick={() => handleUpdateHP(c.id, 1)}>
+                  +1 HP
+                </Button>
               </Box>
-
-              <Select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} displayEmpty fullWidth sx={{ marginTop: 2 }}>
-                <MenuItem value="" disabled>Állapot kiválasztása</MenuItem>
-                {STATUS_EFFECTS.map(effect => (
-                  <MenuItem key={effect} value={effect}>{effect}</MenuItem>
-                ))}
-              </Select>
-              <Button variant="contained" color="warning" onClick={() => handleAddStatusEffect(c.id)} sx={{ marginTop: 1 }}>
-                Állapot Hozzáadása
-              </Button>
             </Paper>
           ))}
         </Box>
