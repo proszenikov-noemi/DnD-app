@@ -3,7 +3,7 @@ import { Container, Typography, Paper, Button, TextField, Box, IconButton } from
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
-import { collection, addDoc, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, deleteDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 
 interface Combatant {
   id: string;
@@ -19,43 +19,28 @@ const CombatPage: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchCombatants = async () => {
-      try {
-        const combatRef = collection(db, 'combatants');
-        const snapshot = await getDocs(combatRef);
-        const combatantsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Combatant));
+    // **Firestore real-time listener a combatants kollekcióhoz**
+    const combatRef = collection(db, 'combatants');
+    const unsubscribe = onSnapshot(combatRef, (snapshot) => {
+      const combatantsData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Combatant));
+      // **Rendezés initiative szerint (csökkenő sorrend)**
+      setCombatants(combatantsData.sort((a, b) => b.battleOrder - a.battleOrder));
+    });
 
-        // **Csökkenő sorrendben rendezzük a battleOrder alapján**
-        setCombatants(combatantsData.sort((a, b) => b.battleOrder - a.battleOrder));
-      } catch (error) {
-        console.error('❌ Hiba történt a kártyák betöltésekor:', error);
-      }
-    };
-    fetchCombatants();
+    // **Leiratkozás a listener-ről, amikor az oldal elhagyásra kerül**
+    return () => unsubscribe();
   }, []);
 
   const handleAddCombatant = async () => {
     if (!newCombatant.name || isNaN(parseInt(newCombatant.battleOrder)) || isNaN(parseInt(newCombatant.hp))) return;
 
     try {
-      const combatRef = collection(db, 'combatants');
-      const docRef = await addDoc(combatRef, {
+      await addDoc(collection(db, 'combatants'), {
         name: newCombatant.name,
         battleOrder: parseInt(newCombatant.battleOrder, 10),
         hp: parseInt(newCombatant.hp, 10),
         color: newCombatant.color,
       });
-
-      const newEntry: Combatant = {
-        id: docRef.id,
-        name: newCombatant.name,
-        battleOrder: parseInt(newCombatant.battleOrder, 10),
-        hp: parseInt(newCombatant.hp, 10),
-        color: newCombatant.color,
-      };
-
-      // **Új kártyát hozzáadunk és rendezzük az initiative alapján**
-      setCombatants((prevCombatants) => [...prevCombatants, newEntry].sort((a, b) => b.battleOrder - a.battleOrder));
 
       setNewCombatant({ name: '', battleOrder: '', hp: '', color: '#000000' });
     } catch (error) {
@@ -66,7 +51,6 @@ const CombatPage: React.FC = () => {
   const handleDeleteCombatant = async (id: string) => {
     try {
       await deleteDoc(doc(db, 'combatants', id));
-      setCombatants(combatants.filter(c => c.id !== id));
     } catch (error) {
       console.error('❌ Hiba történt a kártya törlésekor:', error);
     }
@@ -74,15 +58,10 @@ const CombatPage: React.FC = () => {
 
   const handleUpdateHP = async (id: string, amount: number) => {
     try {
-      const updatedCombatants = combatants.map((c) =>
-        c.id === id ? { ...c, hp: Math.max(0, c.hp + amount) } : c
-      );
-      setCombatants(updatedCombatants);
-
-      const combatantToUpdate = updatedCombatants.find(c => c.id === id);
-      if (combatantToUpdate) {
-        const combatRef = doc(db, 'combatants', id);
-        await updateDoc(combatRef, { hp: combatantToUpdate.hp });
+      const combatantRef = doc(db, 'combatants', id);
+      const updatedCombatant = combatants.find(c => c.id === id);
+      if (updatedCombatant) {
+        await updateDoc(combatantRef, { hp: Math.max(0, updatedCombatant.hp + amount) });
       }
     } catch (error) {
       console.error('❌ Hiba történt a HP frissítésekor:', error);
@@ -136,7 +115,6 @@ const CombatPage: React.FC = () => {
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 3 }}>
           {combatants.map((c) => (
             <Paper key={c.id} elevation={4} sx={{ padding: 2, textAlign: 'center', border: `3px solid ${c.color}`, position: 'relative' }}>
-              {/* Kártya törlése ikon */}
               <IconButton
                 edge="end"
                 onClick={() => handleDeleteCombatant(c.id)}
