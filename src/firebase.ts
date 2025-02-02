@@ -1,6 +1,7 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { getStorage } from "firebase/storage"; // 🔹 Storage importálása
 
 const firebaseConfig = {
     apiKey: "AIzaSyAy37pkUzDsYqDvgIsNSl1SXyTWVhZd_9Q",
@@ -12,7 +13,9 @@ const firebaseConfig = {
   };
 
 
-// Firebase inicializálás
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+  const storage = getStorage(app); // 🔹 Storage inicializálása
+  
+  export { db, auth, storage }; // 🔹 Exportáljuk a Storage-ot is!

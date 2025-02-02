@@ -1,109 +1,261 @@
-import React, { useEffect, useState } from 'react';
-import { auth, db } from '../firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { Container, TextField, Button, Typography, Paper, Box, Divider, Alert } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Container,
+  Typography,
+  Paper,
+  Box,
+  TextField,
+  Button,
+} from "@mui/material";
+import { db, auth } from "../firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
-const CharacterSheetPage: React.FC = () => {
-  const [characterName, setCharacterName] = useState('');
-  const [characterClass, setCharacterClass] = useState('');
-  const [characterRace, setCharacterRace] = useState('');
-  const [strength, setStrength] = useState('');
-  const [dexterity, setDexterity] = useState('');
-  const [constitution, setConstitution] = useState('');
-  const [intelligence, setIntelligence] = useState('');
-  const [wisdom, setWisdom] = useState('');
-  const [charisma, setCharisma] = useState('');
-  const [saveSuccess, setSaveSuccess] = useState(false); // ✅ Új: Sikeres mentés visszajelzés
+interface Character {
+  name: string;
+  race: string;
+  class: string;
+  profBonus: number;
+  walkSpeed: number;
+  initiative: number;
+  armorClass: number;
+  abilities: {
+    strength: number;
+    dexterity: number;
+    constitution: number;
+    intelligence: number;
+    wisdom: number;
+    charisma: number;
+  };
+}
+
+const CharacterSheet: React.FC = () => {
+  const [character, setCharacter] = useState<Character>({
+    name: "",
+    race: "",
+    class: "",
+    profBonus: 0,
+    walkSpeed: 0,
+    initiative: 0,
+    armorClass: 0,
+    abilities: {
+      strength: 0,
+      dexterity: 0,
+      constitution: 0,
+      intelligence: 0,
+      wisdom: 0,
+      charisma: 0,
+    },
+  });
+
+  const [isEditing, setIsEditing] = useState(false); // 🔹 Szerkesztési mód
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchCharacter = async () => {
-      if (auth.currentUser) {
-        const charRef = doc(db, 'characters', auth.currentUser.uid);
-        const charSnap = await getDoc(charRef);
-        if (charSnap.exists()) {
-          const data = charSnap.data();
-          setCharacterName(data.name || '');
-          setCharacterClass(data.class || '');
-          setCharacterRace(data.race || '');
-          setStrength(data.strength || '');
-          setDexterity(data.dexterity || '');
-          setConstitution(data.constitution || '');
-          setIntelligence(data.intelligence || '');
-          setWisdom(data.wisdom || '');
-          setCharisma(data.charisma || '');
-        }
+    const fetchCharacterData = async () => {
+      const userId = auth.currentUser?.uid;
+      if (!userId) return;
+
+      const charDoc = doc(db, "characters", userId);
+      const charSnap = await getDoc(charDoc);
+
+      if (charSnap.exists()) {
+        setCharacter(charSnap.data() as Character);
       }
     };
 
-    fetchCharacter();
+    fetchCharacterData();
   }, []);
 
-  const handleSaveCharacter = async () => {
-    if (auth.currentUser) {
-      await setDoc(doc(db, 'characters', auth.currentUser.uid), {
-        name: characterName,
-        class: characterClass,
-        race: characterRace,
-        strength,
-        dexterity,
-        constitution,
-        intelligence,
-        wisdom,
-        charisma,
-      });
+  const saveCharacterData = async () => {
+    const userId = auth.currentUser?.uid;
+    if (!userId) return;
 
-      setSaveSuccess(true); // ✅ Mentés sikeres visszajelzés
-      setTimeout(() => {
-        setSaveSuccess(false);
-        navigate('/profile'); // ✅ Mentés után visszanavigálás a profilra
-      }, 1500);
+    const charDoc = doc(db, "characters", userId);
+    await setDoc(charDoc, character);
+    setIsEditing(false); // 🔹 Kilépés a szerkesztési módból
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    if (name.startsWith("abilities.")) {
+      const abilityName = name.split(".")[1];
+      setCharacter((prev) => ({
+        ...prev,
+        abilities: {
+          ...prev.abilities,
+          [abilityName]: parseInt(value, 10) || 0,
+        },
+      }));
+    } else {
+      setCharacter((prev) => ({
+        ...prev,
+        [name]: isNaN(parseInt(value, 10)) ? value : parseInt(value, 10),
+      }));
     }
   };
 
   return (
-    <Container maxWidth="sm">
-      <Paper elevation={6} sx={{ padding: 4, backgroundColor: 'background.paper', textAlign: 'center' }}>
-        {/* A Karakter neve nagyobb betűtípussal */}
-        <Typography
-          variant="h3"
-          sx={{ fontFamily: 'MedievalSharp, serif', fontSize: '36px', fontWeight: 'bold', marginBottom: 2 }}
+    <Container maxWidth="sm" sx={{ marginTop: 4 }}>
+      <Paper
+        elevation={6}
+        sx={{
+          padding: 4,
+          backgroundColor: "#1e1e2e",
+          color: "#ffffff",
+          borderRadius: 4,
+        }}
+      >
+        {/* 🔹 Vissza a főoldalra gomb */}
+        <Button
+          variant="contained"
+          color="secondary"
+          sx={{ marginBottom: 2 }}
+          onClick={() => navigate("/profile")}
         >
-          {characterName || 'Karakter Neve'}
-        </Typography>
+          Vissza a főoldalra
+        </Button>
 
-        {saveSuccess && <Alert severity="success">Karakter mentése sikeres!</Alert>}
-
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <TextField label="Karakter neve" fullWidth value={characterName} onChange={(e) => setCharacterName(e.target.value)} />
-          <TextField label="Kaszt" fullWidth value={characterClass} onChange={(e) => setCharacterClass(e.target.value)} />
-          <TextField label="Faj" fullWidth value={characterRace} onChange={(e) => setCharacterRace(e.target.value)} />
-
-          <Divider sx={{ marginY: 2 }} />
-
-          <Typography variant="h5" align="center">Fő tulajdonságok</Typography>
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-            <TextField label="Erő (Strength)" type="number" value={strength} onChange={(e) => setStrength(e.target.value)} />
-            <TextField label="Ügyesség (Dexterity)" type="number" value={dexterity} onChange={(e) => setDexterity(e.target.value)} />
-            <TextField label="Állóképesség (Constitution)" type="number" value={constitution} onChange={(e) => setConstitution(e.target.value)} />
-            <TextField label="Intelligencia (Intelligence)" type="number" value={intelligence} onChange={(e) => setIntelligence(e.target.value)} />
-            <TextField label="Bölcsesség (Wisdom)" type="number" value={wisdom} onChange={(e) => setWisdom(e.target.value)} />
-            <TextField label="Karizma (Charisma)" type="number" value={charisma} onChange={(e) => setCharisma(e.target.value)} />
+        <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
+          <Box
+            sx={{
+              width: 100,
+              height: 100,
+              backgroundColor: "#333",
+              borderRadius: "50%",
+            }}
+          >
+            {/* 🔹 Profilkép */}
           </Box>
 
-          <Button variant="contained" color="primary" onClick={handleSaveCharacter}>
-            Karakter mentése
-          </Button>
+          {isEditing ? (
+            <TextField
+              name="name"
+              label="Név"
+              value={character.name}
+              onChange={handleChange}
+              fullWidth
+            />
+          ) : (
+            <Typography variant="h4">{character.name || "N/A"}</Typography>
+          )}
 
-          {/* ✅ Új: Vissza a profil oldalra gomb */}
-          <Button variant="outlined" color="secondary" onClick={() => navigate('/profile')}>
-            Vissza a Profilra
-          </Button>
+          {isEditing ? (
+            <>
+              <TextField
+                name="race"
+                label="Faj"
+                value={character.race}
+                onChange={handleChange}
+                fullWidth
+              />
+              <TextField
+                name="class"
+                label="Kaszt"
+                value={character.class}
+                onChange={handleChange}
+                fullWidth
+              />
+            </>
+          ) : (
+            <Typography variant="body1">
+              {character.race || "N/A"} | {character.class || "N/A"}
+            </Typography>
+          )}
+
+          {/* 🔹 Statisztikák */}
+          <Box display="flex" justifyContent="space-between" width="100%">
+            {isEditing ? (
+              <>
+                <TextField
+                  name="profBonus"
+                  label="Prof. Bónusz"
+                  value={character.profBonus}
+                  onChange={handleChange}
+                  type="number"
+                  fullWidth
+                />
+                <TextField
+                  name="walkSpeed"
+                  label="Sebesség"
+                  value={character.walkSpeed}
+                  onChange={handleChange}
+                  type="number"
+                  fullWidth
+                />
+                <TextField
+                  name="initiative"
+                  label="Kezdeményezés"
+                  value={character.initiative}
+                  onChange={handleChange}
+                  type="number"
+                  fullWidth
+                />
+                <TextField
+                  name="armorClass"
+                  label="Védőérték"
+                  value={character.armorClass}
+                  onChange={handleChange}
+                  type="number"
+                  fullWidth
+                />
+              </>
+            ) : (
+              <>
+                <Typography>{character.profBonus}</Typography>
+                <Typography>{character.walkSpeed} ft.</Typography>
+                <Typography>{character.initiative}</Typography>
+                <Typography>{character.armorClass}</Typography>
+              </>
+            )}
+          </Box>
+        </Box>
+
+        {/* 🔹 Képességek */}
+        <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap={2}>
+          {Object.keys(character.abilities).map((ability) => (
+            <Paper key={ability} elevation={4} sx={{ padding: 2, textAlign: "center" }}>
+              {isEditing ? (
+                <TextField
+                  name={`abilities.${ability}`}
+                  label={ability.toUpperCase()}
+                  value={character.abilities[ability as keyof typeof character.abilities]}
+                  onChange={handleChange}
+                  type="number"
+                  fullWidth
+                />
+              ) : (
+                <>
+                  <Typography variant="subtitle1">
+                    {character.abilities[ability as keyof typeof character.abilities]}
+                  </Typography>
+                  <Typography variant="caption">{ability.toUpperCase()}</Typography>
+                </>
+              )}
+            </Paper>
+          ))}
+        </Box>
+
+        {/* 🔹 Gombok: Mentés és Szerkesztés */}
+        <Box sx={{ marginTop: 4, textAlign: "center" }}>
+          {isEditing ? (
+            <Button variant="contained" color="primary" onClick={saveCharacterData}>
+              Mentés
+            </Button>
+          ) : (
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => setIsEditing(true)}
+            >
+              Szerkesztés
+            </Button>
+          )}
         </Box>
       </Paper>
     </Container>
   );
 };
 
-export default CharacterSheetPage;
+export default CharacterSheet;
