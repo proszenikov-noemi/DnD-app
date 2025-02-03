@@ -75,7 +75,13 @@ const CombatPage: React.FC = () => {
           variant="outlined"
           color="secondary"
           onClick={() => navigate('/profile')}
-          sx={{ position: 'absolute', top: 10, left: 10 }}
+          sx={{ 
+            display: "flex", 
+            flexDirection: { xs: "column", md: "row" }, 
+            alignItems: { xs: "center", md: "flex-start" }, 
+            justifyContent: "space-between",
+            marginBottom: { xs: 2, md: 0 } 
+          }}
         >
           Vissza a Profilra
         </Button>
@@ -108,7 +114,7 @@ const CombatPage: React.FC = () => {
             onChange={(e) => setNewCombatant({ ...newCombatant, color: e.target.value })}
           />
           <Button variant="contained" color="primary" onClick={handleAddCombatant}>
-            Kártya Hozzáadása
+            Hozzáadás
           </Button>
         </Box>
 

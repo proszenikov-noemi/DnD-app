@@ -152,9 +152,9 @@ const CharacterSheet: React.FC = () => {
               borderRadius: 2,
             }}
           >
-            <CombatStatBox label="Sebesség" value={character.walkSpeed} isEditing={isEditing} onChange={handleChange} />
-            <CombatStatBox label="Védőérték" value={character.armorClass} isEditing={isEditing} onChange={handleChange} />
-            <CombatStatBox label="Kezdeményezés" value={character.initiative} isEditing={isEditing} onChange={handleChange} />
+            <CombatStatBox label="Speed (ft)" value={character.walkSpeed} isEditing={isEditing} onChange={handleChange} />
+            <CombatStatBox label="Armor Clas (AC)" value={character.armorClass} isEditing={isEditing} onChange={handleChange} />
+            <CombatStatBox label="Iniative" value={character.initiative} isEditing={isEditing} onChange={handleChange} />
           </Box>
 
           {/* 🔹 Fő képességek (mobilbarát!) */}
