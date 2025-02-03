@@ -7,6 +7,7 @@ interface StatusBoxProps {
   score: number;
   isEditing: boolean;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  isCombatStat?: boolean; // 🔹 Ha harci stat, kisebb legyen a szöveg
 }
 
 const StatusBox: React.FC<StatusBoxProps> = ({
@@ -15,13 +16,14 @@ const StatusBox: React.FC<StatusBoxProps> = ({
   score,
   isEditing,
   onChange,
+  isCombatStat = false,
 }) => {
   return isEditing ? (
     <Paper
       elevation={4}
       sx={{
-        width: 130,
-        height: 120,
+        width: isCombatStat ? 80 : 130, // 🔹 Harci statok kisebbek
+        height: isCombatStat ? 80 : 130,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -31,10 +33,10 @@ const StatusBox: React.FC<StatusBoxProps> = ({
         fontSize: 20,
         fontWeight: "bold",
         borderRadius: 2,
-        border: "3px solid #ffd700",
+        border: "3px solid rgb(46, 5, 5)",
       }}
     >
-      <Typography variant="h6" sx={{ fontSize: 14 }}>
+      <Typography variant="h6" sx={{ fontSize: isCombatStat ? 12 : 14 }}>
         {ability}
       </Typography>
 
@@ -52,11 +54,11 @@ const StatusBox: React.FC<StatusBoxProps> = ({
     </Paper>
   ) : (
     <svg
-      width="120"
-      height="140"
+      width={isCombatStat ? "90" : "120"}
+      height={isCombatStat ? "90" : "140"}
       viewBox="0 0 120 140"
       xmlns="http://www.w3.org/2000/svg"
-      style={{ margin: "10px" }}
+      
     >
       <path
         d="M10 10 H110 Q115 10 115 15 V125 Q115 130 110 130 H10 Q5 130 5 125 V15 Q5 10 10 10 Z"
@@ -70,7 +72,7 @@ const StatusBox: React.FC<StatusBoxProps> = ({
         x="50%"
         y="25"
         textAnchor="middle"
-        fontSize="14"
+        fontSize={isCombatStat ? "12" : "14"}
         fontFamily="Arial"
         fill="#ffffff"
         fontWeight="bold"
