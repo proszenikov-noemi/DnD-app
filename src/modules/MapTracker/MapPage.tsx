@@ -16,7 +16,7 @@ const charactersCollection = collection(db, "mapCharacters");
 
 const MapPage: React.FC = () => {
   const [characters, setCharacters] = useState<Character[]>([]);
-  const [draggedCharacter, setDraggedCharacter] = useState<string | null>(null);
+  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(charactersCollection, (snapshot) => {
@@ -27,89 +27,78 @@ const MapPage: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  const handleDragStart = (id: string) => {
-    setDraggedCharacter(id);
-  };
+  const handleMapClick = async (event: React.MouseEvent) => {
+    if (!selectedCharacter) return;
 
-  const handleDrop = async (event: React.DragEvent) => {
-    if (!draggedCharacter) return;
+    const mapElement = document.getElementById("map");
+    if (!mapElement) return;
 
-    const mapRect = event.currentTarget.getBoundingClientRect();
+    const mapRect = mapElement.getBoundingClientRect();
     const newX = ((event.clientX - mapRect.left) / mapRect.width) * 100;
     const newY = ((event.clientY - mapRect.top) / mapRect.height) * 100;
 
     try {
-      const characterRef = doc(db, "mapCharacters", draggedCharacter);
+      const characterRef = doc(db, "mapCharacters", selectedCharacter);
       await updateDoc(characterRef, { x: newX, y: newY });
     } catch (error) {
       console.error("❌ Hiba történt a karakter mozgatásakor:", error);
     }
 
-    setDraggedCharacter(null);
+    setSelectedCharacter(null);
   };
 
   return (
     <Box
       sx={{
-        minHeight: "100vh", // Engedi a teljes görgetést
-        backgroundColor: "#000",
+        width: "100vw",
+        height: "100vh",
         display: "flex",
-        justifyContent: "center",
+        flexDirection: "column",
+        alignItems: "center",
+        backgroundColor: "#000",
+        overflow: "hidden",
       }}
     >
-      {/* 🔹 A térkép görgethető fel-le, de nem mozgatható oldalirányba */}
+      {/* 🔹 Térkép háttér */}
       <Box
+        id="map"
         sx={{
-          position: "relative",
-          width: "2200px", // Kitölti a szélességet
+          width: "100%", // Kitölti a teljes szélességet
           height: "auto",
-          overflowY: "auto", // Görgetés engedélyezése
+          maxWidth: "1400px", // Nagyobb kijelzőkre optimalizálva
+          flexGrow: 1,
           backgroundImage: `url('/phandalin-map.webp')`,
           backgroundSize: "contain",
           backgroundRepeat: "no-repeat",
           backgroundPosition: "top center",
+          overflowY: "auto", // 🔹 Görgethető térkép
+          position: "relative",
         }}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={handleDrop}
+        onClick={handleMapClick} // 🔹 Kattintáskor karakter mozgatás
       >
+        {/* 🔹 Karakter ikonok a térképen */}
         {characters.map((char) => (
           <Box
             key={char.id}
-            draggable
-            onDragStart={() => handleDragStart(char.id)}
+            onClick={() => setSelectedCharacter(char.id)}
             sx={{
               position: "absolute",
               left: `${char.x}%`,
               top: `${char.y}%`,
-              width: "50px",
-              height: "50px",
+              width: "20px", // Fix méret mobilon is
+              height: "20px",
               backgroundImage: `url('${char.image}')`,
               backgroundSize: "cover",
               borderRadius: "50%",
               border: `3px solid ${char.color}`,
-              cursor: "grab",
+              cursor: "pointer",
               transform: "translate(-50%, -50%)",
+              transition: "0.2s ease-in-out",
+              boxShadow: selectedCharacter === char.id ? "0px 0px 10px #FFD700" : "none",
             }}
           />
         ))}
       </Box>
-
-      <Typography
-        variant="h5"
-        sx={{
-          position: "absolute",
-          top: "10px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          color: "#fff",
-          backgroundColor: "rgba(0, 0, 0, 0.6)",
-          padding: "10px",
-          borderRadius: "10px",
-          fontFamily: "'MedievalSharp', serif",
-        }}
-      >
-        Térkép - Húzd a karaktereket a megfelelő helyre!
-      </Typography>
     </Box>
   );
 };
