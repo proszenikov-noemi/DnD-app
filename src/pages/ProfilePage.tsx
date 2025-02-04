@@ -84,11 +84,19 @@ const ProfilePage: React.FC = () => {
               </Button>
               <Button
                 component={Link}
-                to="/team" // Csapattagok oldal
+                to="/team"
                 variant="contained"
-                color="primary"
+                color="secondary"
               >
                 Csapattagok
+              </Button>
+              <Button
+                component={Link}
+                to="/map"
+                variant="contained"
+                color="secondary"
+              >
+                Térkép
               </Button>
               <Button
                 onClick={handleLogout}

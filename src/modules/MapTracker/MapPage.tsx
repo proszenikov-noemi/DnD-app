@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
 import { db } from "../../firebase";
-import { collection, getDocs, updateDoc, doc, onSnapshot } from "firebase/firestore";
+import { collection, updateDoc, doc, onSnapshot } from "firebase/firestore";
 
 interface Character {
   id: string;
   name: string;
   image: string;
   color: string;
-  x: number;
-  y: number;
+  x: number; // Számként tárolva
+  y: number; // Számként tárolva
 }
 
 const charactersCollection = collection(db, "mapCharacters"); // Firestore kollekció
@@ -21,7 +21,10 @@ const MapPage: React.FC = () => {
   useEffect(() => {
     // 🔹 REAL-TIME Firestore figyelő
     const unsubscribe = onSnapshot(charactersCollection, (snapshot) => {
-      const updatedCharacters = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Character));
+      const updatedCharacters = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Character[];
       setCharacters(updatedCharacters);
     });
 
@@ -41,7 +44,7 @@ const MapPage: React.FC = () => {
 
     try {
       const characterRef = doc(db, "mapCharacters", draggedCharacter);
-      await updateDoc(characterRef, { x: newX, y: newY });
+      await updateDoc(characterRef, { x: newX, y: newY }); // 🔹 Számként frissítjük az adatokat
     } catch (error) {
       console.error("❌ Hiba történt a karakter mozgatásakor:", error);
     }
@@ -55,33 +58,45 @@ const MapPage: React.FC = () => {
         position: "relative",
         width: "100vw",
         height: "100vh",
-        backgroundImage: `url('/phandalin-map.webp')`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
+        overflow: "auto", // 🔹 Görgethetőség
+        backgroundColor: "#000", // Fekete háttér a térkép alatt
       }}
-      onDragOver={(e) => e.preventDefault()} // 🔹 Engedélyezi a drag & drop-ot
-      onDrop={handleDrop} // 🔹 Elem elengedése után frissítjük a pozíciót
+      onDragOver={(e) => e.preventDefault()} // 🔹 Drag & Drop engedélyezése
+      onDrop={handleDrop} // 🔹 Elem elengedése után pozíció frissítés
     >
-      {characters.map((char) => (
-        <Box
-          key={char.id}
-          draggable
-          onDragStart={() => handleDragStart(char.id)}
-          sx={{
-            position: "absolute",
-            left: `${char.x}%`,
-            top: `${char.y}%`,
-            width: "50px",
-            height: "50px",
-            backgroundImage: `url('${char.image}')`,
-            backgroundSize: "cover",
-            borderRadius: "50%",
-            border: `3px solid ${char.color}`,
-            cursor: "grab",
-            transform: "translate(-50%, -50%)", // 🔹 Középre igazítás
-          }}
-        />
-      ))}
+      {/* Nagy térkép konténer */}
+      <Box
+        sx={{
+          width: "2000px", // Térkép szélessége
+          height: "2000px", // Térkép magassága
+          backgroundImage: `url('/phandalin-map.webp')`,
+          backgroundSize: "contain",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          position: "relative",
+        }}
+      >
+        {characters.map((char) => (
+          <Box
+            key={char.id}
+            draggable
+            onDragStart={() => handleDragStart(char.id)}
+            sx={{
+              position: "absolute",
+              left: `${char.x}%`,
+              top: `${char.y}%`,
+              width: { xs: "30px", md: "50px" }, // 🔹 Mobilon kisebb ikon
+              height: { xs: "30px", md: "50px" }, // 🔹 Mobilon kisebb ikon
+              backgroundImage: `url('${char.image}')`,
+              backgroundSize: "cover",
+              borderRadius: "50%",
+              border: `3px solid ${char.color}`,
+              cursor: "grab",
+              transform: "translate(-50%, -50%)", // 🔹 Középre igazítás
+            }}
+          />
+        ))}
+      </Box>
 
       <Typography
         variant="h5"
