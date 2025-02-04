@@ -4,6 +4,7 @@ import { auth } from "../../firebase";
 import { useNavigate } from "react-router-dom";
 import { Box, TextField, Button, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
+import FallingLeaves from "../../components/FallingLeaves"; // 🌿 Animáció importálása
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -15,7 +16,7 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/profile"); // 🔹 Sikeres bejelentkezés után a profil oldalra navigál
+      navigate("/profile");
     } catch (err) {
       setError("Hibás email vagy jelszó!");
     }
@@ -26,24 +27,28 @@ const LoginPage: React.FC = () => {
       sx={{
         width: "100vw",
         height: "100vh",
-        backgroundImage: `url('/LoginBackground.webp')`,
+        backgroundImage: `url('/HomePageBackground.webp')`, // 🌳 Új háttérkép
         backgroundSize: "cover",
         backgroundPosition: "center",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
         padding: 2,
+        position: "relative",
       }}
     >
+      <FallingLeaves /> {/* 🌿 Animáció a háttérben */}
+
       <Box
         sx={{
-          backgroundColor: "rgba(0, 0, 0, 0.7)", // 🔹 Sötét átlátszó háttér
+          backgroundColor: "rgba(0, 0, 0, 0.7)", // 🔹 Átlátszó sötét háttér
           borderRadius: "15px",
           padding: "30px",
           maxWidth: "500px",
           width: "100%",
-          boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.8)",
           textAlign: "center",
+          boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.8)",
+          zIndex: 2,
         }}
       >
         <Typography
@@ -57,16 +62,14 @@ const LoginPage: React.FC = () => {
         >
           Bejelentkezés
         </Typography>
+
         {error && (
           <Typography color="error" sx={{ marginBottom: 2 }}>
             {error}
           </Typography>
         )}
-        <Box
-          component="form"
-          onSubmit={handleLogin}
-          sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-        >
+
+        <Box component="form" onSubmit={handleLogin} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <TextField
             label="Email"
             fullWidth
@@ -78,9 +81,7 @@ const LoginPage: React.FC = () => {
                 color: "#fff",
                 borderRadius: "5px",
               },
-              "& .MuiInputLabel-root": {
-                color: "#aaa",
-              },
+              "& .MuiInputLabel-root": { color: "#aaa" },
             }}
           />
           <TextField
@@ -95,9 +96,7 @@ const LoginPage: React.FC = () => {
                 color: "#fff",
                 borderRadius: "5px",
               },
-              "& .MuiInputLabel-root": {
-                color: "#aaa",
-              },
+              "& .MuiInputLabel-root": { color: "#aaa" },
             }}
           />
           <Button
@@ -115,27 +114,17 @@ const LoginPage: React.FC = () => {
               "&:hover": { backgroundColor: "#e76f51" },
             }}
           >
-            Belépés
+            Bejelentkezés
           </Button>
         </Box>
+
         <Typography
           variant="body2"
           align="center"
-          sx={{
-            marginTop: 3,
-            color: "#ffffff",
-            fontFamily: "'MedievalSharp', serif",
-          }}
+          sx={{ marginTop: 3, color: "#ffffff", fontFamily: "'MedievalSharp', serif" }}
         >
           Még nincs fiókod?{" "}
-          <Link
-            to="/register"
-            style={{
-              color: "#f4a261",
-              fontWeight: "bold",
-              textDecoration: "none",
-            }}
-          >
+          <Link to="/register" style={{ color: "#f4a261", fontWeight: "bold", textDecoration: "none" }}>
             Regisztrálj itt!
           </Link>
         </Typography>

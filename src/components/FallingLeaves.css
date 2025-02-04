@@ -1,0 +1,36 @@
+.falling-leaves {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none; /* 🔹 Ne lehessen rájuk kattintani */
+    overflow: hidden;
+    z-index: 1; /* 🔹 A háttér fölé, de a szöveg alá kerül */
+  }
+  
+  .leaf {
+    position: absolute;
+    top: -10%;
+    width: 40px;
+    height: 40px;
+    background-image: url("/magic-leaf.webp"); /* 🔹 Használj egy varázslatos levél képet */
+    background-size: cover;
+    opacity: 0.8;
+    animation: fall linear infinite;
+  }
+  
+  @keyframes fall {
+    0% {
+      transform: translateY(0) rotate(0deg);
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateY(100vh) rotate(360deg);
+      opacity: 0;
+    }
+  }
+  
