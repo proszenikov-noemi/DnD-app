@@ -85,12 +85,12 @@ const MapPage: React.FC = () => {
               position: "absolute",
               left: `${char.x}%`,
               top: `${char.y}%`,
-              width: "20px", // Fix méret mobilon is
-              height: "20px",
+              width: "10px", // Fix méret mobilon is
+              height: "10px",
               backgroundImage: `url('${char.image}')`,
               backgroundSize: "cover",
               borderRadius: "50%",
-              border: `3px solid ${char.color}`,
+              border: `1px solid ${char.color}`,
               cursor: "pointer",
               transform: "translate(-50%, -50%)",
               transition: "0.2s ease-in-out",
