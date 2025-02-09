@@ -188,7 +188,7 @@ const CharacterSheet: React.FC = () => {
         </Tabs>
 
         <Box sx={{ marginTop: 3 }}>
-          {activeTab === 0 && character && <StatTab character={character} />}
+          {activeTab === 0 && character && <StatTab character={character} onChange={handleEditChange} />}
           {activeTab === 1 && character && <InventoryTab character={character} />}
         </Box>
       </Paper>

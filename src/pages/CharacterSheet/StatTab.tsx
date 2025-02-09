@@ -2,22 +2,21 @@ import React from "react";
 import { Box, Typography, Button } from "@mui/material";
 import StatusBox from "../../components/StatusBox";
 
-interface Abilities {
-  strength: number;
-  dexterity: number;
-  constitution: number;
-  intelligence: number;
-  wisdom: number;
-  charisma: number;
-}
-
 interface StatTabProps {
   character: {
-    abilities: Abilities;
-  } | null; // Lehetséges, hogy a karakter undefined vagy null
+    abilities: {
+      strength: number;
+      dexterity: number;
+      constitution: number;
+      intelligence: number;
+      wisdom: number;
+      charisma: number;
+    };
+  };
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void; // ✅ OnChange prop hozzáadása
 }
 
-const StatTab: React.FC<StatTabProps> = ({ character }) => {
+const StatTab: React.FC<StatTabProps> = ({ character, onChange }) => {
   const [isEditing, setIsEditing] = React.useState(false);
 
   const handleEdit = () => {
@@ -29,18 +28,8 @@ const StatTab: React.FC<StatTabProps> = ({ character }) => {
     // Adatok mentése
   };
 
-  // Ha nincs karakter vagy abilities, megjelenítünk egy hibaüzenetet
-  if (!character || !character.abilities) {
-    return (
-      <Typography sx={{ color: "#fff", textAlign: "center", marginTop: 2 }}>
-        Nincs elérhető karakter adat!
-      </Typography>
-    );
-  }
-
   return (
     <>
-      {/* Statok megjelenítése */}
       <Box
         display="grid"
         gridTemplateColumns="repeat(3, 1fr)"
@@ -60,12 +49,11 @@ const StatTab: React.FC<StatTabProps> = ({ character }) => {
               modifier={modifier}
               score={score}
               isEditing={isEditing}
+              onChange={onChange} // ✅ Továbbított prop
             />
           );
         })}
       </Box>
-
-      {/* Mentés és Szerkesztés gombok */}
       <Box sx={{ marginTop: 3, textAlign: "center" }}>
         {isEditing ? (
           <Button variant="contained" color="primary" onClick={handleSave}>

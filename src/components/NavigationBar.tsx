@@ -131,7 +131,7 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
         <List>
           {navItems.map((item) => (
             <ListItem
-              component="button"
+              button
               key={item.path}
               onClick={() => {
                 navigate(item.path);
@@ -150,6 +150,8 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
                 sx={{
                   textAlign: "center",
                   fontFamily: "'MedievalSharp', serif",
+                  fontSize: "16px",
+                  fontWeight: "bold",
                 }}
               />
             </ListItem>
@@ -157,7 +159,7 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
 
           {user && (
             <ListItem
-              component="button"
+              button
               onClick={handleLogout}
               sx={{
                 padding: "10px 20px",
