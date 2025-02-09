@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../../firebase";
 import { useNavigate } from "react-router-dom";
-import { Box, TextField, Button, Typography } from "@mui/material";
+import { Box, TextField, Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import { Link } from "react-router-dom";
 import FallingLeaves from "../../components/FallingLeaves"; // 🌿 Animáció importálása
 
@@ -10,6 +10,9 @@ const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetSuccess, setResetSuccess] = useState(false);
+  const [openResetDialog, setOpenResetDialog] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -19,6 +22,15 @@ const LoginPage: React.FC = () => {
       navigate("/profile");
     } catch (err) {
       setError("Hibás email vagy jelszó!");
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    try {
+      await sendPasswordResetEmail(auth, resetEmail);
+      setResetSuccess(true);
+    } catch (err) {
+      setError("Nem sikerült elküldeni a jelszó-visszaállítási emailt.");
     }
   };
 
@@ -128,7 +140,67 @@ const LoginPage: React.FC = () => {
             Regisztrálj itt!
           </Link>
         </Typography>
+
+        {/* Jelszó visszaállítás link */}
+        <Typography
+          variant="body2"
+          align="center"
+          sx={{
+            marginTop: 2,
+            color: "#f4a261",
+            fontFamily: "'MedievalSharp', serif",
+            cursor: "pointer",
+            textDecoration: "underline",
+          }}
+          onClick={() => setOpenResetDialog(true)}
+        >
+          Elfelejtetted a jelszavad?
+        </Typography>
       </Box>
+
+      {/* Jelszó visszaállítási modal */}
+      <Dialog 
+  open={openResetDialog} 
+  onClose={() => setOpenResetDialog(false)}
+  maxWidth="sm" // 🖥️ Szélesebb ablak
+  fullWidth // 🔹 Teljes szélesség kihasználása
+>
+  <DialogTitle sx={{ textAlign: "center" }}>Jelszó visszaállítása</DialogTitle>
+  <DialogContent sx={{ padding: "20px", maxWidth: "500px", margin: "0 auto" }}>
+    <Typography variant="body1" sx={{ marginBottom: 2 }}>
+      Add meg az email-címed, és küldünk egy jelszó-visszaállítási linket!
+    </Typography>
+    <TextField
+      autoFocus
+      margin="dense"
+      label="Email cím"
+      fullWidth
+      variant="outlined"
+      value={resetEmail}
+      onChange={(e) => setResetEmail(e.target.value)}
+      sx={{
+        "& .MuiInputBase-root": {
+          backgroundColor: "#f7f7f7",
+          borderRadius: "8px",
+        },
+      }}
+    />
+    {resetSuccess && (
+      <Typography color="success" sx={{ marginTop: 1, textAlign: "center" }}>
+        Jelszó-visszaállítási email elküldve!
+      </Typography>
+    )}
+  </DialogContent>
+  <DialogActions sx={{ justifyContent: "center", paddingBottom: "15px" }}>
+    <Button onClick={() => setOpenResetDialog(false)} color="secondary">
+      Mégse
+    </Button>
+    <Button onClick={handlePasswordReset} color="primary" variant="contained">
+      Küldés
+    </Button>
+  </DialogActions>
+</Dialog>
+
     </Box>
   );
 };

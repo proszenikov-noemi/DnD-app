@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import { db } from "../../firebase";
 import { collection, updateDoc, doc, onSnapshot } from "firebase/firestore";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch"; // 📌 Zoomolás és navigáció
 
 interface Character {
   id: string;
@@ -17,6 +18,7 @@ const charactersCollection = collection(db, "mapCharacters");
 const MapPage: React.FC = () => {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
+  const [zoomScale, setZoomScale] = useState(1); // 🔍 Zoom skála tárolása
 
   useEffect(() => {
     const unsubscribe = onSnapshot(charactersCollection, (snapshot) => {
@@ -59,46 +61,57 @@ const MapPage: React.FC = () => {
         overflow: "hidden",
       }}
     >
-      {/* 🔹 Térkép háttér */}
-      <Box
-        id="map"
-        sx={{
-          width: "100%", // Kitölti a teljes szélességet
-          height: "auto",
-          maxWidth: "1400px", // Nagyobb kijelzőkre optimalizálva
-          flexGrow: 1,
-          backgroundImage: `url('/phandalin-map.webp')`,
-          backgroundSize: "contain",
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "top center",
-          overflowY: "auto", // 🔹 Görgethető térkép
-          position: "relative",
-        }}
-        onClick={handleMapClick} // 🔹 Kattintáskor karakter mozgatás
+      {/* 🔍 Modern zoom- és navigációs rendszer */}
+      <TransformWrapper
+        minScale={0.5} // 🔍 Minimum zoom
+        maxScale={3} // 🔎 Maximum zoom
+        onZoom={(e) => setZoomScale(e.state.scale)} // 📏 Zoom érték mentése
+        limitToBounds={false}
+        centerOnInit
       >
-        {/* 🔹 Karakter ikonok a térképen */}
-        {characters.map((char) => (
+        <TransformComponent>
+          {/* 📍 A térkép konténer */}
           <Box
-            key={char.id}
-            onClick={() => setSelectedCharacter(char.id)}
+            id="map"
             sx={{
-              position: "absolute",
-              left: `${char.x}%`,
-              top: `${char.y}%`,
-              width: "10px", // Fix méret mobilon is
-              height: "10px",
-              backgroundImage: `url('${char.image}')`,
-              backgroundSize: "cover",
-              borderRadius: "50%",
-              border: `1px solid ${char.color}`,
-              cursor: "pointer",
-              transform: "translate(-50%, -50%)",
-              transition: "0.2s ease-in-out",
-              boxShadow: selectedCharacter === char.id ? "0px 0px 10px #FFD700" : "none",
+              width: "1400px", // 📐 Nagyobb méret a könnyebb navigáció érdekében
+              height: "900px",
+              backgroundImage: `url('/phandalin-map.webp')`,
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "top center",
+              position: "relative",
             }}
-          />
-        ))}
-      </Box>
+            onClick={handleMapClick}
+          >
+            {/* 📍 Karakterek, amelyek zoommal arányosan nőnek/kisebbednek */}
+            {characters.map((char) => (
+              <Box
+                key={char.id}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedCharacter(char.id);
+                }}
+                sx={{
+                  position: "absolute",
+                  left: `${char.x}%`,
+                  top: `${char.y}%`,
+                  width: `${Math.min(24, Math.max(12, 14 * (0.6 + zoomScale / 4))) }px`, // ✅ MAX méret 24px!
+                  height: `${Math.min(24, Math.max(12, 14 * (0.6 + zoomScale / 4))) }px`,
+                  backgroundImage: `url('${char.image}')`,
+                  backgroundSize: "cover",
+                  borderRadius: "50%",
+                  border: `1px solid ${char.color}`,
+                  cursor: "pointer",
+                  transform: "translate(-50%, -50%)",
+                  transition: "transform 0.2s ease-in-out, width 0.2s ease-in-out, height 0.2s ease-in-out",
+                  boxShadow: selectedCharacter === char.id ? "0px 0px 10px #FFD700" : "none",
+                }}
+              />
+            ))}
+          </Box>
+        </TransformComponent>
+      </TransformWrapper>
     </Box>
   );
 };
