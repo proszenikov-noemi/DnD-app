@@ -68,14 +68,6 @@ const ProfilePage: React.FC = () => {
               </Button>
               <Button
                 component={Link}
-                to="/inventory"
-                variant="contained"
-                color="secondary"
-              >
-                Inventory
-              </Button>
-              <Button
-                component={Link}
                 to="/combat"
                 variant="contained"
                 color="error"
@@ -97,6 +89,14 @@ const ProfilePage: React.FC = () => {
                 color="secondary"
               >
                 Térkép
+              </Button>
+              <Button
+                component={Link}
+                to="/chat"
+                variant="contained"
+                color="secondary"
+              >
+                Chat
               </Button>
               <Button
                 onClick={handleLogout}

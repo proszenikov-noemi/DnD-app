@@ -1,7 +1,18 @@
 import React, { useState } from "react";
-import { AppBar, Toolbar, Typography, Button, IconButton, Drawer, List, ListItem, ListItemText, Box } from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  Box,
+  Button,
+} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
 
@@ -21,15 +32,14 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
   const navItems = [
     { label: "Home", path: "/profile" },
     { label: "Karakterlap", path: "/character-sheet" },
-    { label: "Inventory", path: "/inventory" },
     { label: "Harc", path: "/combat" },
     { label: "Csapattagok", path: "/team" },
     { label: "Térkép", path: "/map" },
+    { label: "Chat", path: "/chat" }, // Chat menüpont
   ];
 
   return (
     <>
-      {/* 🔹 Felső navigációs sáv (PC nézet) */}
       {user && (
         <AppBar
           position="fixed"
@@ -40,7 +50,6 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
           }}
         >
           <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-            {/* 🔹 Bejelentkezett felhasználó neve */}
             <Typography
               variant="h6"
               sx={{
@@ -52,13 +61,11 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
               {user?.displayName || "Kalandor"}
             </Typography>
 
-            {/* 🔹 Navigációs gombok (PC-n) */}
             <Box sx={{ display: { xs: "none", md: "flex" } }}>
               {navItems.map((item) => (
                 <Button
                   key={item.path}
-                  component={Link}
-                  to={item.path}
+                  onClick={() => navigate(item.path)}
                   sx={{
                     color: "#fff",
                     fontSize: "16px",
@@ -76,8 +83,6 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
                   {item.label}
                 </Button>
               ))}
-
-              {/* 🔹 Kijelentkezés gomb (PC) */}
               <Button
                 onClick={handleLogout}
                 sx={{
@@ -98,7 +103,6 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
               </Button>
             </Box>
 
-            {/* 🔹 Mobilmenü ikon */}
             <IconButton
               edge="start"
               color="inherit"
@@ -112,7 +116,6 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
         </AppBar>
       )}
 
-      {/* 🔹 Mobil oldalsáv (Drawer) */}
       <Drawer
         anchor="left"
         open={mobileOpen}
@@ -127,13 +130,43 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
       >
         <List>
           {navItems.map((item) => (
-            <ListItem button key={item.path} component={Link} to={item.path} onClick={handleDrawerToggle}>
-              <ListItemText primary={item.label} sx={{ textAlign: "center", fontFamily: "'MedievalSharp', serif" }} />
+            <ListItem
+              component="button"
+              key={item.path}
+              onClick={() => {
+                navigate(item.path);
+                handleDrawerToggle();
+              }}
+              sx={{
+                padding: "10px 20px",
+                "&:hover": {
+                  backgroundColor: "#FFD700",
+                  color: "#000",
+                },
+              }}
+            >
+              <ListItemText
+                primary={item.label}
+                sx={{
+                  textAlign: "center",
+                  fontFamily: "'MedievalSharp', serif",
+                }}
+              />
             </ListItem>
           ))}
 
           {user && (
-            <ListItem button onClick={handleLogout}>
+            <ListItem
+              component="button"
+              onClick={handleLogout}
+              sx={{
+                padding: "10px 20px",
+                "&:hover": {
+                  backgroundColor: "#FFD700",
+                  color: "#000",
+                },
+              }}
+            >
               <ListItemText
                 primary="Kijelentkezés"
                 sx={{
@@ -148,8 +181,7 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
         </List>
       </Drawer>
 
-      {/* 🔹 Tartalomhoz igazítás (hogy ne takarjon ki semmit) */}
-      {user && <Box sx={{ height: "64px" }} />} {/* Az AppBar magasságát pótolja */}
+      {user && <Box sx={{ height: "64px" }} />}
     </>
   );
 };
