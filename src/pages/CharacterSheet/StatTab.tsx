@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, useMediaQuery, useTheme } from "@mui/material";
 import StatusBox from "../../components/StatusBox";
 
 interface StatTabProps {
@@ -13,11 +13,12 @@ interface StatTabProps {
       charisma: number;
     };
   };
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void; // ✅ OnChange prop hozzáadása
 }
 
-const StatTab: React.FC<StatTabProps> = ({ character, onChange }) => {
+const StatTab: React.FC<StatTabProps> = ({ character }) => {
   const [isEditing, setIsEditing] = React.useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // 📱 Mobil nézet ellenőrzése
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -32,11 +33,11 @@ const StatTab: React.FC<StatTabProps> = ({ character, onChange }) => {
     <>
       <Box
         display="grid"
-        gridTemplateColumns="repeat(3, 1fr)"
-        gap={2}
+        gridTemplateColumns={isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)"} // 📱 Mobilon 2 oszlop, asztali nézetben 3 oszlop
+        gap={isMobile ? 1 : 2} // 📱 Mobilon kisebb távolság
         sx={{
           backgroundColor: "#2a2a40",
-          padding: 2,
+          padding: isMobile ? 1 : 2, // 📱 Mobilon kisebb padding
           borderRadius: 2,
         }}
       >
@@ -49,7 +50,6 @@ const StatTab: React.FC<StatTabProps> = ({ character, onChange }) => {
               modifier={modifier}
               score={score}
               isEditing={isEditing}
-              onChange={onChange} // ✅ Továbbított prop
             />
           );
         })}

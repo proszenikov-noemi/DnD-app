@@ -8,7 +8,9 @@ import {
   List,
   ListItem,
   ListItemText,
+  IconButton,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete"; // 🗑️ Törlés ikon
 import { db, auth } from "../firebase";
 import {
   collection,
@@ -17,10 +19,14 @@ import {
   orderBy,
   onSnapshot,
   Timestamp,
+  doc,
+  getDoc,
+  deleteDoc,
 } from "firebase/firestore";
 
 interface Message {
   id: string;
+  userId: string;
   username: string;
   message: string;
   timestamp: Timestamp;
@@ -29,8 +35,26 @@ interface Message {
 const ChatPage: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const [username, setUsername] = useState("Névtelen Kalandor"); // 🔹 Alapértelmezett név
   const user = auth.currentUser;
 
+  // 🔹 Felhasználónév lekérése a Firestore "users" kollekciójából
+  useEffect(() => {
+    const fetchUsername = async () => {
+      if (!user?.uid) return;
+
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        setUsername(userDocSnap.data().username || "Névtelen Kalandor");
+      }
+    };
+
+    fetchUsername();
+  }, [user]);
+
+  // 🔹 Üzenetek figyelése Firestore-ban
   useEffect(() => {
     const messagesRef = collection(db, "messages");
     const q = query(messagesRef, orderBy("timestamp", "asc"));
@@ -46,18 +70,30 @@ const ChatPage: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
+  // 🔹 Üzenet küldése Firestore-ba
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
+    if (!user?.uid) return;
 
     const messagesRef = collection(db, "messages");
     await addDoc(messagesRef, {
-      userId: user?.uid,
-      username: user?.displayName || "Névtelen Kalandor",
+      userId: user.uid,
+      username: username, // 🔹 A lekért név kerül ide!
       message: newMessage.trim(),
       timestamp: Timestamp.now(),
     });
 
     setNewMessage("");
+  };
+
+  // 🔹 Üzenet törlése Firestore-ból
+  const deleteMessage = async (messageId: string, messageUserId: string) => {
+    if (user?.uid !== messageUserId) {
+      alert("Nem törölheted mások üzeneteit!");
+      return;
+    }
+
+    await deleteDoc(doc(db, "messages", messageId));
   };
 
   return (
@@ -106,6 +142,9 @@ const ChatPage: React.FC = () => {
               sx={{
                 marginBottom: 1,
                 borderBottom: "1px solid #3a3a4a",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
               }}
             >
               <ListItemText
@@ -130,6 +169,13 @@ const ChatPage: React.FC = () => {
                   </Typography>
                 }
               />
+
+              {/* 🔹 Törlés gomb, csak saját üzeneteknél látható */}
+              {user?.uid === msg.userId && (
+                <IconButton onClick={() => deleteMessage(msg.id, msg.userId)} sx={{ color: "#ff6666" }}>
+                  <DeleteIcon />
+                </IconButton>
+              )}
             </ListItem>
           ))}
         </List>
