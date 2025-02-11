@@ -112,7 +112,6 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
                 }}
               />
 
-
               <Typography
                 variant="h6"
                 sx={{
@@ -147,7 +146,7 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
               </MenuItem>
             </Menu>
 
-            {/* Navigációs gombok a jobb oldalon */}
+            {/* Navigációs gombok (PC-n) */}
             <Box sx={{ display: { xs: "none", md: "flex" }, marginLeft: "auto" }}>
               {navItems.map((item) => (
                 <Button
@@ -185,10 +184,31 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
                 <LogoutIcon />
               </IconButton>
             </Box>
+
+            {/* 🔹 Hamburger menü ikon (MOBILRA) */}
+            <IconButton
+              edge="end"
+              color="inherit"
+              aria-label="menu"
+              onClick={handleDrawerToggle}
+              sx={{ display: { xs: "flex", md: "none" } }} // 🔹 Csak mobilon jelenjen meg
+            >
+              <MenuIcon />
+            </IconButton>
           </Toolbar>
         </AppBar>
       )}
 
+      {/* 🔹 Mobil menü drawer */}
+      <Drawer anchor="left" open={mobileOpen} onClose={handleDrawerToggle}>
+        <List>
+          {navItems.map((item) => (
+            <ListItem button key={item.path} onClick={() => { navigate(item.path); handleDrawerToggle(); }}>
+              <ListItemText primary={item.label} />
+            </ListItem>
+          ))}
+        </List>
+      </Drawer>
     </>
   );
 };
