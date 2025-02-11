@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Paper, Typography, TextField, Box, IconButton } from "@mui/material";
+import React from "react";
+import { Box, Typography, IconButton } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 
@@ -9,7 +9,6 @@ interface StatusBoxProps {
   score: number;
   isEditing: boolean;
   onChange: (ability: string, newValue: number) => void;
-  isCombatStat?: boolean;
 }
 
 const StatusBox: React.FC<StatusBoxProps> = ({
@@ -18,147 +17,122 @@ const StatusBox: React.FC<StatusBoxProps> = ({
   score,
   isEditing,
   onChange,
-  isCombatStat = false,
 }) => {
-  const [tempScore, setTempScore] = useState<string>(score.toString());
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === "") {
-      setTempScore(""); // Ha üres, ne jelenjen meg NaN
-    } else {
-      const numericValue = parseInt(value, 10);
-      if (!isNaN(numericValue) && numericValue >= 1 && numericValue <= 20) {
-        // 🔹 Ellenőrizzük, hogy az érték 1 és 20 között legyen
-        setTempScore(numericValue.toString());
-        onChange(ability, numericValue);
-      }
-    }
-  };
-
   const handleIncrement = () => {
-    const newValue = Math.min(20, parseInt(tempScore || "1", 10) + 1); // 🔹 MAX 20
-    setTempScore(newValue.toString());
+    const newValue = Math.min(20, score + 1);
     onChange(ability, newValue);
   };
 
   const handleDecrement = () => {
-    const newValue = Math.max(1, parseInt(tempScore || "1", 10) - 1); // 🔹 MIN 1
-    setTempScore(newValue.toString());
+    const newValue = Math.max(1, score - 1);
     onChange(ability, newValue);
   };
 
-  return isEditing ? (
-    <Paper
-      elevation={4}
+  return (
+    <Box
       sx={{
-        width: isCombatStat ? 80 : 130,
-        height: isCombatStat ? 80 : 130,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "#2a2a40",
-        color: "white",
-        fontSize: 20,
-        fontWeight: "bold",
-        borderRadius: 2,
-        border: "3px solid rgb(46, 5, 5)",
+        textAlign: "center",
+        position: "relative",
+        width: "120px",
+        marginBottom: isEditing ? "20px" : "0", // Kicsit kisebb margó szerkesztésben
       }}
     >
-      <Typography variant="h6" sx={{ fontSize: isCombatStat ? 12 : 14 }}>
-        {ability}
-      </Typography>
+      {/* Hexagon Shape */}
+      <Box
+        sx={{
+          width: "120px",
+          height: "140px",
+          position: "relative",
+        }}
+      >
+        <svg
+          width="120"
+          height="140"
+          viewBox="0 0 120 140"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <polygon
+            points="60,5 115,35 115,105 60,135 5,105 5,35"
+            fill="#1e1e2e"
+            stroke="#a855f7"
+            strokeWidth="3"
+          />
+        </svg>
 
-      <Box display="flex" alignItems="center" justifyContent="center">
-        <IconButton onClick={handleDecrement} sx={{ color: "#f44336" }}>
-          <RemoveIcon />
-        </IconButton>
-
-        <TextField
-          name={ability.toLowerCase()}
-          type="number"
-          value={tempScore}
-          onChange={handleInputChange}
-          onBlur={() => {
-            if (tempScore === "") {
-              setTempScore(score.toString());
-            }
-          }}
+        {/* Modifier (Középre helyezve és nagyobb mérettel) */}
+        <Typography
           sx={{
-            width: 60,
-            textAlign: "center",
-            input: { textAlign: "center", fontSize: "18px", color: "white" },
+            position: "absolute",
+            top: "60px",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            fontSize: "40px", // Nagyobb méret
+            fontWeight: "bold",
+            color: "#ffffff",
           }}
-        />
+        >
+          {modifier >= 0 ? `+${modifier}` : modifier}
+        </Typography>
 
-        <IconButton onClick={handleIncrement} sx={{ color: "#4caf50" }}>
-          <AddIcon />
-        </IconButton>
+        {/* Ability Név (Lentebb helyezve) */}
+        <Typography
+          sx={{
+            position: "absolute",
+            top: "85px", // Kicsit lejjebb, hogy ne ütközzön a modifierrel
+            left: "50%",
+            transform: "translateX(-50%)",
+            fontSize: "14px",
+            fontWeight: "bold",
+            color: "#ffffff",
+          }}
+        >
+          {ability}
+        </Typography>
+
+        {/* Stat Érték (Alsó Kapszula) */}
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: "-10px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            backgroundColor: "#a855f7",
+            borderRadius: "20px",
+            padding: "5px 15px",
+            textAlign: "center",
+            minWidth: "35px",
+          }}
+        >
+          <Typography sx={{ color: "white", fontWeight: "bold" }}>
+            {score}
+          </Typography>
+        </Box>
       </Box>
-    </Paper>
-  ) : (
-    <svg
-      width={isCombatStat ? "90" : "120"}
-      height={isCombatStat ? "90" : "140"}
-      viewBox="0 0 120 140"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M10 10 H110 Q115 10 115 15 V125 Q115 130 110 130 H10 Q5 130 5 125 V15 Q5 10 10 10 Z"
-        fill="#1e1e2e"
-        stroke="#4a4a5a"
-        strokeWidth="3"
-        rx="10"
-      />
 
-      <text
-        x="50%"
-        y="25"
-        textAnchor="middle"
-        fontSize={isCombatStat ? "12" : "14"}
-        fontFamily="Arial"
-        fill="#ffffff"
-        fontWeight="bold"
-      >
-        {ability}
-      </text>
+      {/* Szerkesztési Mód - Csak Plusz és Mínusz Gombok Lentebb */}
+      {isEditing && (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 1,
+            marginTop: "10px", // Kisebb távolság, hogy ne lógjon túl
+          }}
+        >
+          <IconButton onClick={handleDecrement} sx={{ color: "#f44336" }}>
+            <RemoveIcon />
+          </IconButton>
 
-      <rect
-        x="35"
-        y="35"
-        width="50"
-        height="30"
-        rx="5"
-        fill="#333333"
-        stroke="#ffffff"
-        strokeWidth="2"
-      />
-      <text
-        x="50%"
-        y="55"
-        textAnchor="middle"
-        fontSize="16"
-        fontFamily="Arial"
-        fill="#ffffff"
-        fontWeight="bold"
-      >
-        {modifier > 0 ? `+${modifier}` : modifier}
-      </text>
-
-      <circle cx="60" cy="100" r="20" fill="#444" />
-      <text
-        x="50%"
-        y="105"
-        textAnchor="middle"
-        fontSize="14"
-        fontFamily="Arial"
-        fill="#ffffff"
-        fontWeight="bold"
-      >
-        {score}
-      </text>
-    </svg>
+          <IconButton onClick={handleIncrement} sx={{ color: "#4caf50" }}>
+            <AddIcon />
+          </IconButton>
+        </Box>
+      )}
+    </Box>
   );
 };
 

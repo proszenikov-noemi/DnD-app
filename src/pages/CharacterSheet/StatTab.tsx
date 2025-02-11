@@ -1,46 +1,79 @@
-import React, { useState } from "react";
-import { Box, Button } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Box, Button, Paper } from "@mui/material";
 import StatusBox from "../../components/StatusBox";
+import { db, auth } from "../../firebase";
+import { doc, updateDoc, getDoc } from "firebase/firestore";
 
-interface StatTabProps {
-  character: {
-    abilities: {
-      strength: number;
-      dexterity: number;
-      constitution: number;
-      intelligence: number;
-      wisdom: number;
-      charisma: number;
-    };
-  };
-}
+const FIXED_STAT_ORDER = [
+  "strength",
+  "dexterity",
+  "constitution",
+  "intelligence",
+  "wisdom",
+  "charisma",
+];
 
-const StatTab: React.FC<StatTabProps> = ({ character }) => {
+const StatTab: React.FC<{ character: any }> = ({ character }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [abilities, setAbilities] = useState({ ...character.abilities });
+  const [abilities, setAbilities] = useState<{ [key: string]: number }>({});
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (character?.abilities) {
+      setAbilities({ ...character.abilities });
+    }
+  }, [character]);
 
   const handleStatChange = (ability: string, newValue: number) => {
     setAbilities((prev) => ({
       ...prev,
-      [ability]: newValue,
+      [ability]: Math.min(20, Math.max(1, newValue)),
     }));
   };
 
+  const handleSave = async () => {
+    if (!auth.currentUser || !character.id) return;
+
+    setSaving(true);
+    const characterRef = doc(db, "characters", character.id);
+    await updateDoc(characterRef, { abilities });
+    setSaving(false);
+    setIsEditing(false);
+  };
+
   return (
-    <>
+    <Paper
+      sx={{
+        backgroundColor: "#1e1e2e",
+        padding: 4,
+        borderRadius: 4,
+        textAlign: "center",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
       <Box
-        display="grid"
-        gridTemplateColumns="repeat(3, 1fr)"
-        gap={2}
-        sx={{ backgroundColor: "#2a2a40", padding: 2, borderRadius: 2 }}
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 3,
+          justifyContent: "center",
+          alignItems: "center",
+          "@media (max-width: 600px)": {
+            gridTemplateColumns: "repeat(2, 1fr)",
+          },
+        }}
       >
-        {Object.entries(abilities).map(([ability, score]) => {
-          const modifier = Math.floor((score - 10) / 2); // Modifier számítása
+        {FIXED_STAT_ORDER.map((ability) => {
+          const score = abilities[ability] ?? 10;
+          const modifier = Math.floor((score - 10) / 2);
+
           return (
             <StatusBox
               key={ability}
               ability={ability}
-              modifier={modifier} // 🔹 Modifier elküldése a StatusBox-nak
+              modifier={modifier}
               score={score}
               isEditing={isEditing}
               onChange={handleStatChange}
@@ -49,16 +82,15 @@ const StatTab: React.FC<StatTabProps> = ({ character }) => {
         })}
       </Box>
 
-      <Box sx={{ marginTop: 3, textAlign: "center" }}>
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={() => setIsEditing(!isEditing)}
-        >
-          {isEditing ? "Mentés" : "Szerkesztés"}
-        </Button>
-      </Box>
-    </>
+      <Button
+        variant="contained"
+        color="primary"
+        sx={{ marginTop: 3 }}
+        onClick={isEditing ? handleSave : () => setIsEditing(true)}
+      >
+        {isEditing ? "Mentés" : "Szerkesztés"}
+      </Button>
+    </Paper>
   );
 };
 
