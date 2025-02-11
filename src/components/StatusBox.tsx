@@ -1,13 +1,15 @@
-import React from "react";
-import { Paper, Typography, TextField } from "@mui/material";
+import React, { useState } from "react";
+import { Paper, Typography, TextField, Box, IconButton } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
 
 interface StatusBoxProps {
   ability: string;
   modifier: number;
   score: number;
   isEditing: boolean;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  isCombatStat?: boolean; // 🔹 Ha harci stat, kisebb legyen a szöveg
+  onChange: (ability: string, newValue: number) => void;
+  isCombatStat?: boolean;
 }
 
 const StatusBox: React.FC<StatusBoxProps> = ({
@@ -18,11 +20,39 @@ const StatusBox: React.FC<StatusBoxProps> = ({
   onChange,
   isCombatStat = false,
 }) => {
+  const [tempScore, setTempScore] = useState<string>(score.toString());
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "") {
+      setTempScore(""); // Ha üres, ne jelenjen meg NaN
+    } else {
+      const numericValue = parseInt(value, 10);
+      if (!isNaN(numericValue) && numericValue >= 1 && numericValue <= 20) {
+        // 🔹 Ellenőrizzük, hogy az érték 1 és 20 között legyen
+        setTempScore(numericValue.toString());
+        onChange(ability, numericValue);
+      }
+    }
+  };
+
+  const handleIncrement = () => {
+    const newValue = Math.min(20, parseInt(tempScore || "1", 10) + 1); // 🔹 MAX 20
+    setTempScore(newValue.toString());
+    onChange(ability, newValue);
+  };
+
+  const handleDecrement = () => {
+    const newValue = Math.max(1, parseInt(tempScore || "1", 10) - 1); // 🔹 MIN 1
+    setTempScore(newValue.toString());
+    onChange(ability, newValue);
+  };
+
   return isEditing ? (
     <Paper
       elevation={4}
       sx={{
-        width: isCombatStat ? 80 : 130, // 🔹 Harci statok kisebbek
+        width: isCombatStat ? 80 : 130,
         height: isCombatStat ? 80 : 130,
         display: "flex",
         flexDirection: "column",
@@ -40,17 +70,32 @@ const StatusBox: React.FC<StatusBoxProps> = ({
         {ability}
       </Typography>
 
-      <TextField
-        name={`abilities.${ability.toLowerCase()}`}
-        type="number"
-        value={score}
-        onChange={onChange}
-        sx={{
-          width: 100,
-          textAlign: "center",
-          input: { textAlign: "center", fontSize: "18px", color: "white" },
-        }}
-      />
+      <Box display="flex" alignItems="center" justifyContent="center">
+        <IconButton onClick={handleDecrement} sx={{ color: "#f44336" }}>
+          <RemoveIcon />
+        </IconButton>
+
+        <TextField
+          name={ability.toLowerCase()}
+          type="number"
+          value={tempScore}
+          onChange={handleInputChange}
+          onBlur={() => {
+            if (tempScore === "") {
+              setTempScore(score.toString());
+            }
+          }}
+          sx={{
+            width: 60,
+            textAlign: "center",
+            input: { textAlign: "center", fontSize: "18px", color: "white" },
+          }}
+        />
+
+        <IconButton onClick={handleIncrement} sx={{ color: "#4caf50" }}>
+          <AddIcon />
+        </IconButton>
+      </Box>
     </Paper>
   ) : (
     <svg
@@ -58,7 +103,6 @@ const StatusBox: React.FC<StatusBoxProps> = ({
       height={isCombatStat ? "90" : "140"}
       viewBox="0 0 120 140"
       xmlns="http://www.w3.org/2000/svg"
-      
     >
       <path
         d="M10 10 H110 Q115 10 115 15 V125 Q115 130 110 130 H10 Q5 130 5 125 V15 Q5 10 10 10 Z"

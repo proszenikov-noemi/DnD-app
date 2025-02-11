@@ -1,5 +1,5 @@
-import React from "react";
-import { Box, Typography, Button, useMediaQuery, useTheme } from "@mui/material";
+import React, { useState } from "react";
+import { Box, Button } from "@mui/material";
 import StatusBox from "../../components/StatusBox";
 
 interface StatTabProps {
@@ -16,54 +16,47 @@ interface StatTabProps {
 }
 
 const StatTab: React.FC<StatTabProps> = ({ character }) => {
-  const [isEditing, setIsEditing] = React.useState(false);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // 📱 Mobil nézet ellenőrzése
+  const [isEditing, setIsEditing] = useState(false);
+  const [abilities, setAbilities] = useState({ ...character.abilities });
 
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  const handleSave = () => {
-    setIsEditing(false);
-    // Adatok mentése
+  const handleStatChange = (ability: string, newValue: number) => {
+    setAbilities((prev) => ({
+      ...prev,
+      [ability]: newValue,
+    }));
   };
 
   return (
     <>
       <Box
         display="grid"
-        gridTemplateColumns={isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)"} // 📱 Mobilon 2 oszlop, asztali nézetben 3 oszlop
-        gap={isMobile ? 1 : 2} // 📱 Mobilon kisebb távolság
-        sx={{
-          backgroundColor: "#2a2a40",
-          padding: isMobile ? 1 : 2, // 📱 Mobilon kisebb padding
-          borderRadius: 2,
-        }}
+        gridTemplateColumns="repeat(3, 1fr)"
+        gap={2}
+        sx={{ backgroundColor: "#2a2a40", padding: 2, borderRadius: 2 }}
       >
-        {Object.entries(character.abilities).map(([ability, score]) => {
-          const modifier = Math.floor((score - 10) / 2);
+        {Object.entries(abilities).map(([ability, score]) => {
+          const modifier = Math.floor((score - 10) / 2); // Modifier számítása
           return (
             <StatusBox
               key={ability}
-              ability={ability.toUpperCase()}
-              modifier={modifier}
+              ability={ability}
+              modifier={modifier} // 🔹 Modifier elküldése a StatusBox-nak
               score={score}
               isEditing={isEditing}
+              onChange={handleStatChange}
             />
           );
         })}
       </Box>
+
       <Box sx={{ marginTop: 3, textAlign: "center" }}>
-        {isEditing ? (
-          <Button variant="contained" color="primary" onClick={handleSave}>
-            Mentés
-          </Button>
-        ) : (
-          <Button variant="outlined" color="secondary" onClick={handleEdit}>
-            Szerkesztés
-          </Button>
-        )}
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={() => setIsEditing(!isEditing)}
+        >
+          {isEditing ? "Mentés" : "Szerkesztés"}
+        </Button>
       </Box>
     </>
   );
