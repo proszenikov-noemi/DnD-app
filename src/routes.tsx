@@ -5,7 +5,7 @@ import LoginPage from "./modules/Auth/LoginPage";
 import RegisterPage from "./modules/Auth/RegisterPage";
 import ProfilePage from "./pages/ProfilePage";
 import CharacterPage from "./pages/CharacterSheet/CharacterSheetPage";
-import CombatPage from "./pages/CombatPage";
+import CombatPage from "./pages/Combat/CombatPage";
 import TeamPage from "./pages/TeamPage";
 import MapPage from "./modules/MapTracker/MapPage"; // ✅ Új térkép oldal
 import ChatPage from "./pages/ChatPage"; // ✅ Új Chat oldal
