@@ -73,7 +73,7 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
         <AppBar
           position="sticky"
           sx={{
-            background: `linear-gradient(90deg, ${campaign.colors[0]}, ${campaign.colors[1]})`, // 🔹 Dinamikus színváltás
+            background: `linear-gradient(90deg, ${campaign.colors[0]}, ${campaign.colors[1]})`,
             boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.8)",
             zIndex: 1100,
             paddingY: "10px",
@@ -100,7 +100,7 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
                 boxShadow: "3px 0px 10px rgba(0, 0, 0, 0.6)",
                 cursor: "pointer",
               }}
-              onClick={handleMenuOpen} // 🔹 Kampányválasztó menü megnyitása
+              onClick={handleMenuOpen}
             >
               {/* 🔹 Sötétebb háttér az olvashatóságért */}
               <Box
@@ -191,7 +191,7 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
               color="inherit"
               aria-label="menu"
               onClick={handleDrawerToggle}
-              sx={{ display: { xs: "flex", md: "none" } }} // 🔹 Csak mobilon jelenjen meg
+              sx={{ display: { xs: "flex", md: "none" } }}
             >
               <MenuIcon />
             </IconButton>
@@ -200,13 +200,18 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
       )}
 
       {/* 🔹 Mobil menü drawer */}
-      <Drawer anchor="left" open={mobileOpen} onClose={handleDrawerToggle}>
+      <Drawer anchor="right" open={mobileOpen} onClose={handleDrawerToggle}>
         <List>
           {navItems.map((item) => (
             <ListItem button key={item.path} onClick={() => { navigate(item.path); handleDrawerToggle(); }}>
               <ListItemText primary={item.label} />
             </ListItem>
           ))}
+          {/* 🔹 Kijelentkezés opció a mobil menüben */}
+          <ListItem button onClick={handleLogout}>
+            <LogoutIcon sx={{ marginRight: "10px" }} />
+            <ListItemText primary="Kijelentkezés" />
+          </ListItem>
         </List>
       </Drawer>
     </>
