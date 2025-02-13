@@ -43,8 +43,8 @@ const CombatPage: React.FC = () => {
 
         {/* Tabs - Hősök & Szörnyek hozzáadása */}
         <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)} centered>
-          <Tab label="Hősök hozzáadása" />
-          <Tab label="Szörnyek hozzáadása" />
+          <Tab label="Hősök" />
+          <Tab label="Szörnyek" />
         </Tabs>
 
         {/* Tartalom fülek szerint */}

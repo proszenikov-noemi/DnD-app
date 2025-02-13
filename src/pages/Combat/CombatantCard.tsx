@@ -29,20 +29,17 @@ const CombatantCard: React.FC<CombatantCardProps> = ({
 }) => {
   const [damageInput, setDamageInput] = useState("");
 
-  // **Szín meghatározása a százalékos HP alapján**
   const getHpColor = (hp: number, maxHp: number) => {
-    if (maxHp <= 0) return "#777777"; // Ha a max HP hibás, alapértelmezett szürke
-
+    if (maxHp <= 0) return "#777777";
     const percentage = (hp / maxHp) * 100;
-    if (percentage > 50) return "#4CAF50"; // Zöld
-    if (percentage > 20) return "#FFA500"; // Narancs
-    if (percentage > 0) return "#FF4444"; // Piros
-    return "#777777"; // Szürke (ha 0 vagy kevesebb)
+    if (percentage > 50) return "#4CAF50";
+    if (percentage > 20) return "#FFA500";
+    if (percentage > 0) return "#FF4444";
+    return "#777777";
   };
 
   const handleHpChange = async (amount: number) => {
-    const newHp = hp + amount;
-    await updateDoc(doc(db, "combatants", id), { hp: newHp });
+    await updateDoc(doc(db, "combatants", id), { hp: hp + amount });
   };
 
   const handleDamageSubmit = async () => {
@@ -67,22 +64,15 @@ const CombatantCard: React.FC<CombatantCardProps> = ({
         borderRadius: 3,
         border: `3px solid ${color}`,
         position: "relative",
-        width: "300px",
+        width: "320px",
       }}
     >
-      {/* Törlés gomb */}
-      <IconButton
-        onClick={handleDelete}
-        sx={{ position: "absolute", top: 5, right: 5, color: "#ff4d4d" }}
-      >
+      <IconButton onClick={handleDelete} sx={{ position: "absolute", top: 5, right: 5, color: "#ff4d4d" }}>
         <DeleteIcon />
       </IconButton>
 
-      <Typography variant="h4">
-        {battleOrder} - {name}
-      </Typography>
+      <Typography variant="h4">{battleOrder} - {name}</Typography>
 
-      {/* HP és AC sor */}
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 2, marginTop: 2 }}>
         <IconButton onClick={() => handleHpChange(1)} sx={{ color: "#4CAF50" }}>
           <KeyboardArrowUpIcon fontSize="large" />
@@ -93,7 +83,7 @@ const CombatantCard: React.FC<CombatantCardProps> = ({
           sx={{
             fontWeight: "bold",
             color: "#fff",
-            backgroundColor: getHpColor(hp, maxHp), // **Dinamukusan állítjuk be a háttérszínt**
+            backgroundColor: getHpColor(hp, maxHp),
             padding: "6px 12px",
             borderRadius: "6px",
             minWidth: "50px",
@@ -112,7 +102,6 @@ const CombatantCard: React.FC<CombatantCardProps> = ({
         </Box>
       </Box>
 
-      {/* Sebzés mező */}
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 1, marginTop: 2 }}>
         <TextField
           label="Sebzés"

@@ -1,79 +1,108 @@
 import React, { useState } from "react";
-import { Box, TextField, Button, MenuItem, Select, FormControl, InputLabel, Typography } from "@mui/material";
+import { Box, TextField, Button, MenuItem, Select, Typography } from "@mui/material";
 import { db } from "../../firebase";
 import { collection, addDoc } from "firebase/firestore";
 
-const initialMonsters = [
-  { name: "Orc", ac: 13, hp: 15, color: "#4b8b3b" },
-  { name: "Goblin", ac: 15, hp: 7, color: "#4a752c" },
-  { name: "Bandit", ac: 12, hp: 11, color: "#8b4513" },
+// 🔹 Szörnyek listája
+const monsterList = [
+  { name: "Carrion Crawler", hp: 51, ac: 13 },
+  { name: "Gorthok the Thunder Boar", hp: 95, ac: 16 },
+  { name: "Needle Blight", hp: 11, ac: 12 },
+  { name: "Vine Blight", hp: 26, ac: 12 },
+  { name: "Twig Blight", hp: 4, ac: 13 },
+  { name: "Ankheg", hp: 39, ac: 14 },
+  { name: "Banshee", hp: 58, ac: 12 },
+  { name: "Centaur", hp: 45, ac: 12 },
+  { name: "Ghoul", hp: 22, ac: 12 },
+  { name: "Giant Crab", hp: 13, ac: 15 },
+  { name: "Giant Rat", hp: 7, ac: 12 },
+  { name: "Giant Spider", hp: 26, ac: 14 },
+  { name: "Harpy", hp: 38, ac: 13 },
+  { name: "Manticore", hp: 68, ac: 14 },
+  { name: "Mimic", hp: 58, ac: 12 },
+  { name: "Ochre Jelly", hp: 45, ac: 8 },
+  { name: "Ogre", hp: 59, ac: 11 },
+  { name: "Orc", hp: 15, ac: 13 },
+  { name: "Stirge", hp: 2, ac: 14 },
+  { name: "Wererat", hp: 33, ac: 12 },
+  { name: "Will-o'-Wisp", hp: 22, ac: 19 },
+  { name: "Invisible Stalker", hp: 104, ac: 14 },
+  { name: "Young White Dragon", hp: 133, ac: 17 },
 ];
 
 const MonstersTab: React.FC = () => {
   const [selectedMonster, setSelectedMonster] = useState<string>("");
-  const [customMonster, setCustomMonster] = useState({ name: "", ac: "", hp: "", color: "#000000" });
-  const [monsters, setMonsters] = useState([...initialMonsters, { name: "Egyéb", ac: 0, hp: 0, color: "#000000" }]);
+  const [customMonster, setCustomMonster] = useState(false);
+  const [monsterData, setMonsterData] = useState({ name: "", hp: "", ac: "", initiative: "", quantity: "1" });
+
+  const handleMonsterChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const selectedName = event.target.value as string;
+    if (selectedName === "custom") {
+      setCustomMonster(true);
+      setMonsterData({ name: "", hp: "", ac: "", initiative: "", quantity: "1" });
+    } else {
+      const foundMonster = monsterList.find((monster) => monster.name === selectedName);
+      setCustomMonster(false);
+      setMonsterData({
+        name: foundMonster?.name || "",
+        hp: foundMonster?.hp.toString() || "",
+        ac: foundMonster?.ac.toString() || "",
+        initiative: "",
+        quantity: "1",
+      });
+    }
+    setSelectedMonster(selectedName);
+  };
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setMonsterData({ ...monsterData, [event.target.name]: event.target.value });
+  };
 
   const handleAddMonster = async () => {
-    if (!selectedMonster) return;
+    if (!monsterData.name || isNaN(parseInt(monsterData.hp)) || isNaN(parseInt(monsterData.ac))) return;
 
-    if (selectedMonster === "Egyéb") {
-      if (!customMonster.name || isNaN(parseInt(customMonster.hp)) || isNaN(parseInt(customMonster.ac))) return;
-
-      try {
+    try {
+      for (let i = 0; i < parseInt(monsterData.quantity, 10); i++) {
         await addDoc(collection(db, "combatants"), {
-          name: customMonster.name,
-          battleOrder: 10, // Default initiative
-          hp: parseInt(customMonster.hp, 10),
-          maxHp: parseInt(customMonster.hp, 10), // 🔹 Max HP added
-          ac: parseInt(customMonster.ac, 10),
-          color: customMonster.color,
+          name: monsterData.name + (parseInt(monsterData.quantity, 10) > 1 ? ` #${i + 1}` : ""),
+          hp: parseInt(monsterData.hp, 10),
+          maxHp: parseInt(monsterData.hp, 10),
+          ac: parseInt(monsterData.ac, 10),
+          battleOrder: parseInt(monsterData.initiative, 10),
+          color: "#8B0000",
         });
-
-        setCustomMonster({ name: "", ac: "", hp: "", color: "#000000" });
-      } catch (error) {
-        console.error("❌ Hiba történt az egyedi szörny hozzáadásakor:", error);
       }
-    } else {
-      const monsterData = monsters.find((m) => m.name === selectedMonster);
-      if (!monsterData) return;
-
-      try {
-        await addDoc(collection(db, "combatants"), {
-          name: monsterData.name,
-          battleOrder: 10, // Default initiative
-          hp: monsterData.hp,
-          maxHp: monsterData.hp, // 🔹 Max HP added
-          ac: monsterData.ac,
-          color: monsterData.color,
-        });
-      } catch (error) {
-        console.error("❌ Hiba történt a szörnyek hozzáadásakor:", error);
-      }
+      setSelectedMonster("");
+      setMonsterData({ name: "", hp: "", ac: "", initiative: "", quantity: "1" });
+    } catch (error) {
+      console.error("Hiba történt a szörny hozzáadásakor:", error);
     }
-    setSelectedMonster("");
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2, alignItems: "center" }}>
-      <Typography variant="h5" sx={{ fontFamily: "Cinzel, serif", color: "#FFD700" }}>
-        Szörnyek hozzáadása
-      </Typography>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Typography variant="h6" sx={{ color: "#fff" }}>Válassz szörnyet:</Typography>
+      <Select value={selectedMonster} onChange={handleMonsterChange} displayEmpty sx={{ backgroundColor: "#2a2d35", color: "#fff" }}>
+        <MenuItem value="" disabled>Válassz szörnyet</MenuItem>
+        {monsterList.map((monster) => (
+          <MenuItem key={monster.name} value={monster.name}>{monster.name}</MenuItem>
+        ))}
+        <MenuItem value="custom">Egyéb (Saját szörny)</MenuItem>
+      </Select>
 
-      <FormControl fullWidth>
-        <InputLabel>Válassz egy szörnyet</InputLabel>
-        <Select value={selectedMonster} onChange={(e) => setSelectedMonster(e.target.value)} label="Szörny">
-          {monsters.map((monster) => (
-            <MenuItem key={monster.name} value={monster.name}>
-              {monster.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      {/* Fix iniative és quantity mezők */}
+      <TextField label="Initiative" name="initiative" type="number" value={monsterData.initiative} onChange={handleInputChange} />
+      <TextField label="Darabszám" name="quantity" type="number" value={monsterData.quantity} onChange={handleInputChange} />
 
-      <Button variant="contained" color="secondary" onClick={handleAddMonster}>
-        Szörny Hozzáadása
-      </Button>
+      {customMonster && (
+        <>
+          <TextField label="Név" name="name" value={monsterData.name} onChange={handleInputChange} />
+          <TextField label="HP" name="hp" type="number" value={monsterData.hp} onChange={handleInputChange} />
+          <TextField label="AC" name="ac" type="number" value={monsterData.ac} onChange={handleInputChange} />
+        </>
+      )}
+
+      <Button variant="contained" color="primary" onClick={handleAddMonster}>Hozzáadás</Button>
     </Box>
   );
 };
