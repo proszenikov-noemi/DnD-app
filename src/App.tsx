@@ -4,13 +4,15 @@ import theme from "./theme";
 import AppRoutes from "./routes";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
-import NavigationBar from "./components/NavigationBar"; // ✅ NAVBAR BEHÚZÁSA
-import { useLocation } from "react-router-dom"; // ✅ AKTUÁLIS OLDAL FIGYELÉSE
+import NavigationBar from "./components/NavigationBar"; 
+import { useLocation } from "react-router-dom"; 
+import { CampaignProvider } from "./context/CampaignContext"; 
+import GlobalBackground from "./components/GlobalBackground"; // 🔹 Háttér beillesztése
 
 const App: React.FC = () => {
   const [user, setUser] = useState(auth.currentUser);
   const [loading, setLoading] = useState(true);
-  const location = useLocation(); // 📌 Az aktuális útvonal követése
+  const location = useLocation(); 
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (loggedInUser) => {
@@ -25,15 +27,17 @@ const App: React.FC = () => {
     return <div style={{ textAlign: "center", padding: "50px", fontSize: "20px" }}>Betöltés...</div>;
   }
 
-  // 🔹 Ellenőrizzük, hogy a user be van-e jelentkezve, és melyik oldalon vagyunk
-  const hideNavbarRoutes = ["/", "/login", "/register"]; // 📌 Ezeken az oldalakon nincs navbar
+  const hideNavbarRoutes = ["/", "/login", "/register"]; 
   const shouldShowNavbar = user && !hideNavbarRoutes.includes(location.pathname);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      {shouldShowNavbar && <NavigationBar user={user} />} {/* ✅ NAVIGÁCIÓS SÁV CSAK BEJELENTKEZÉS UTÁN */}
-      <AppRoutes user={user} /> {/* ✅ Az oldalak megjelenítése */}
+      <CampaignProvider>
+        <GlobalBackground /> {/* 🔹 Háttérvideó minden oldalon */}
+        {shouldShowNavbar && <NavigationBar user={user} />} 
+        <AppRoutes user={user} />
+      </CampaignProvider>
     </ThemeProvider>
   );
 };
