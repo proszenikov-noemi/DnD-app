@@ -81,9 +81,11 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
         >
           <Toolbar sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative" }}>
             
-            {/* 🔹 Kampány választó gomb */}
+            {/* 🔹 Kampány választó gomb (BAL OLDALON) */}
             <Box
               sx={{
+                display: "flex",
+                alignItems: "center",
                 position: "absolute",
                 left: 0,
                 top: 0,
@@ -94,8 +96,6 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
                 backgroundPosition: "center",
                 borderRadius: "0px 15px 15px 0px",
                 overflow: "hidden",
-                display: "flex",
-                alignItems: "center",
                 textAlign: "left",
                 boxShadow: "3px 0px 10px rgba(0, 0, 0, 0.6)",
                 cursor: "pointer",
@@ -146,6 +146,17 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
               </MenuItem>
             </Menu>
 
+            {/* 🔹 Mobil nézetben a HAMBURGER MENÜ a JOBB oldalon */}
+            <IconButton
+              edge="end"
+              color="inherit"
+              aria-label="menu"
+              onClick={handleDrawerToggle}
+              sx={{ display: { xs: "flex", md: "none" }, marginLeft: "auto" }} // 🔹 Jobb oldalra igazítás mobilon
+            >
+              <MenuIcon />
+            </IconButton>
+
             {/* Navigációs gombok (PC-n) */}
             <Box sx={{ display: { xs: "none", md: "flex" }, marginLeft: "auto" }}>
               {navItems.map((item) => (
@@ -184,17 +195,6 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
                 <LogoutIcon />
               </IconButton>
             </Box>
-
-            {/* 🔹 Hamburger menü ikon (MOBILRA) */}
-            <IconButton
-              edge="end"
-              color="inherit"
-              aria-label="menu"
-              onClick={handleDrawerToggle}
-              sx={{ display: { xs: "flex", md: "none" } }}
-            >
-              <MenuIcon />
-            </IconButton>
           </Toolbar>
         </AppBar>
       )}
