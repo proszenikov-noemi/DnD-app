@@ -19,24 +19,11 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
-
-// 🔹 Kampányok definiálása
-const campaigns = {
-  icepeak: {
-    name: "Dragon of Icespire Peak",
-    image: "/icespire.webp",
-    colors: ["#002b4e", "#005a8d"], // Sötétkék téma
-  },
-  witchlight: {
-    name: "The Wild Beyond the Witchlight",
-    image: "/wild.jpg",
-    colors: ["#4a125a", "#8d44ad"], // Lila téma
-  },
-};
+import { useCampaign } from "../context/CampaignContext"; // 📌 Kampány kontextus importálása
 
 const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
+  const { campaign, setCampaign } = useCampaign(); // 📌 Kontextusból töltjük be az adatokat
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [campaign, setCampaign] = useState(campaigns.icepeak); // 🔹 Alapértelmezett kampány
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
 
@@ -53,8 +40,20 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleMenuClose = (selectedCampaign: string) => {
-    setCampaign(campaigns[selectedCampaign]);
+  // 📌 Kampányváltáskor frissítjük a globális állapotot
+  const handleMenuClose = (selectedCampaign: "icepeak" | "witchlight") => {
+    setCampaign(selectedCampaign === "icepeak"
+      ? {
+          name: "Dragon of Icespire Peak",
+          image: "/icespire.webp",
+          colors: ["#002b4e", "#005a8d"],
+        }
+      : {
+          name: "The Wild Beyond the Witchlight",
+          image: "/wild.jpg",
+          colors: ["#4a125a", "#8d44ad"],
+        }
+    );
     setAnchorEl(null);
   };
 
@@ -81,7 +80,7 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
         >
           <Toolbar sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative" }}>
             
-            {/* 🔹 Kampány választó gomb (BAL OLDALON) */}
+            {/* 🔹 Kampány választó gomb */}
             <Box
               sx={{
                 display: "flex",
@@ -102,7 +101,6 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
               }}
               onClick={handleMenuOpen}
             >
-              {/* 🔹 Sötétebb háttér az olvashatóságért */}
               <Box
                 sx={{
                   position: "absolute",
@@ -111,7 +109,6 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
                   background: "linear-gradient(to right, rgba(0, 0, 0, 0.67), transparent)",
                 }}
               />
-
               <Typography
                 variant="h6"
                 sx={{
@@ -133,11 +130,7 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
             </Box>
 
             {/* 🔹 Kampányváltó menü */}
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={() => setAnchorEl(null)}
-            >
+            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
               <MenuItem onClick={() => handleMenuClose("icepeak")}>
                 Dragon of Icespire Peak
               </MenuItem>
@@ -146,13 +139,13 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
               </MenuItem>
             </Menu>
 
-            {/* 🔹 Mobil nézetben a HAMBURGER MENÜ a JOBB oldalon */}
+            {/* 🔹 Mobilnézet hamburger menü (HAMBURGER ICON) */}
             <IconButton
               edge="end"
               color="inherit"
               aria-label="menu"
               onClick={handleDrawerToggle}
-              sx={{ display: { xs: "flex", md: "none" }, marginLeft: "auto" }} // 🔹 Jobb oldalra igazítás mobilon
+              sx={{ display: { xs: "flex", md: "none" }, marginLeft: "auto" }} 
             >
               <MenuIcon />
             </IconButton>
@@ -160,38 +153,11 @@ const NavigationBar: React.FC<{ user: any }> = ({ user }) => {
             {/* Navigációs gombok (PC-n) */}
             <Box sx={{ display: { xs: "none", md: "flex" }, marginLeft: "auto" }}>
               {navItems.map((item) => (
-                <Button
-                  key={item.path}
-                  onClick={() => navigate(item.path)}
-                  sx={{
-                    color: "#E0F7FA",
-                    fontSize: "16px",
-                    fontWeight: "bold",
-                    textTransform: "none",
-                    fontFamily: "'MedievalSharp', serif",
-                    marginLeft: "15px",
-                    borderRadius: "10px",
-                    padding: "8px 15px",
-                    backgroundColor: "rgba(255, 255, 255, 0.2)",
-                    transition: "0.3s ease-in-out",
-                    "&:hover": { backgroundColor: "#81D4FA", color: "#000" },
-                  }}
-                >
+                <Button key={item.path} onClick={() => navigate(item.path)} sx={{ color: "#E0F7FA" }}>
                   {item.label}
                 </Button>
               ))}
-
-              {/* 🔹 Kijelentkezés gomb (csak ikon, jobb oldalon) */}
-              <IconButton
-                onClick={handleLogout}
-                sx={{
-                  color: "#fff",
-                  marginLeft: "15px",
-                  borderRadius: "10px",
-                  transition: "0.3s ease-in-out",
-                  "&:hover": { color: "#ff6659" },
-                }}
-              >
+              <IconButton onClick={handleLogout} sx={{ color: "#fff", marginLeft: "15px" }}>
                 <LogoutIcon />
               </IconButton>
             </Box>

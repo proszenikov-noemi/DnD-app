@@ -20,14 +20,34 @@ const RegisterPage: React.FC = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
+      // 🔹 Felhasználó Firestore-ban mentése
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         username: username,
         email: user.email,
-        character: null,
       });
 
-      navigate("/login"); // 🔹 Azonnali váltás a bejelentkezési oldalra
+      // 🔹 Automatikusan generál egy karaktert a felhasználónak
+      const characterRef = doc(db, "characters", user.uid);
+      await setDoc(characterRef, {
+        name: "Új Kalandor",
+        race: "Ismeretlen",
+        class: "N/A",
+        walkSpeed: 30,
+        initiative: 0,
+        armorClass: 10,
+        profilePicture: "",
+        abilities: {
+          strength: 10,
+          dexterity: 10,
+          constitution: 10,
+          intelligence: 10,
+          wisdom: 10,
+          charisma: 10,
+        },
+      });
+
+      navigate("/profile"); // 🔹 Sikeres regisztráció után átirányít a profil oldalra
     } catch (err) {
       setError("Hiba történt a regisztráció során!");
     }
@@ -46,7 +66,7 @@ const RegisterPage: React.FC = () => {
         justifyContent: "center",
         alignItems: "center",
         padding: 2,
-        overflow: "hidden", // 🔹 Fontos a levelek megjelenítéséhez
+        overflow: "hidden",
       }}
     >
       <FallingLeaves /> {/* 🍃 Falevelek háttérben */}
@@ -61,7 +81,7 @@ const RegisterPage: React.FC = () => {
           boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.8)",
           textAlign: "center",
           position: "relative",
-          zIndex: 2, // 📌 A falevelek mögött marad
+          zIndex: 2,
         }}
       >
         <Typography
@@ -81,75 +101,15 @@ const RegisterPage: React.FC = () => {
           </Typography>
         )}
         <Box component="form" onSubmit={handleRegister} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <TextField
-            label="Felhasználónév"
-            fullWidth
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            sx={{
-              "& .MuiInputBase-root": { backgroundColor: "#333", color: "#fff", borderRadius: "5px" },
-              "& .MuiInputLabel-root": { color: "#aaa" },
-            }}
-          />
-          <TextField
-            label="Email"
-            fullWidth
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            sx={{
-              "& .MuiInputBase-root": { backgroundColor: "#333", color: "#fff", borderRadius: "5px" },
-              "& .MuiInputLabel-root": { color: "#aaa" },
-            }}
-          />
-          <TextField
-            label="Jelszó"
-            type="password"
-            fullWidth
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            sx={{
-              "& .MuiInputBase-root": { backgroundColor: "#333", color: "#fff", borderRadius: "5px" },
-              "& .MuiInputLabel-root": { color: "#aaa" },
-            }}
-          />
-          <Button
-            type="submit"
-            variant="contained"
-            fullWidth
-            sx={{
-              backgroundColor: "#f4a261",
-              color: "#ffffff",
-              fontSize: "16px",
-              fontWeight: "bold",
-              textTransform: "none",
-              borderRadius: "10px",
-              boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.5)",
-              "&:hover": { backgroundColor: "#e76f51" },
-            }}
-          >
+          <TextField label="Felhasználónév" fullWidth value={username} onChange={(e) => setUsername(e.target.value)} />
+          <TextField label="Email" fullWidth value={email} onChange={(e) => setEmail(e.target.value)} />
+          <TextField label="Jelszó" type="password" fullWidth value={password} onChange={(e) => setPassword(e.target.value)} />
+          <Button type="submit" variant="contained" fullWidth>
             Regisztráció
           </Button>
         </Box>
-        <Typography
-          variant="body2"
-          align="center"
-          sx={{
-            marginTop: 3,
-            color: "#ffffff",
-            fontFamily: "'MedievalSharp', serif",
-          }}
-        >
-          Már van fiókod?{" "}
-          <Link
-            to="/login"
-            style={{
-              color: "#f4a261",
-              fontWeight: "bold",
-              textDecoration: "none",
-            }}
-          >
-            Lépj be itt!
-          </Link>
+        <Typography variant="body2" align="center" sx={{ marginTop: 3, color: "#ffffff" }}>
+          Már van fiókod? <Link to="/login">Lépj be itt!</Link>
         </Typography>
       </Box>
     </Box>
