@@ -18,47 +18,97 @@ const charactersCollection = collection(db, "mapCharacters");
 const MapPage: React.FC = () => {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [localCharacters, setLocalCharacters] = useState<Character[]>([]);
-  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
+  const [selectedCharacters, setSelectedCharacters] = useState<string[]>([]);
   const [zoomScale, setZoomScale] = useState(1);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(charactersCollection, (snapshot) => {
       const updatedCharacters = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Character));
       setCharacters(updatedCharacters);
-      setLocalCharacters(updatedCharacters); // Szinkronizáljuk a helyi állapotot
+      setLocalCharacters(updatedCharacters);
     });
 
     return () => unsubscribe();
   }, []);
 
+  const calculateTrianglePositions = (baseX: number, baseY: number, count: number) => {
+    const spacing = 1; // 🔥 Szoros háromszög - 2% távolság maximum
+    const positions = [];
+
+    if (count === 1) {
+      positions.push({ x: baseX, y: baseY });
+    } else {
+      let currentRow = 0;
+      let charsInRow = 1;
+      let placed = 0;
+
+      while (placed < count) {
+        for (let i = 0; i < charsInRow && placed < count; i++) {
+          const offsetX = (i - (charsInRow - 1) / 2) * spacing; // Sor középre igazítva
+          const offsetY = currentRow * spacing * 0.9; // Kissé összenyomott sorok, hogy szoros legyen
+          positions.push({
+            x: baseX + offsetX,
+            y: baseY + offsetY,
+          });
+          placed++;
+        }
+        currentRow++;
+        charsInRow++;
+      }
+    }
+
+    return positions;
+  };
+
   const handleMapClick = async (event: React.MouseEvent) => {
-    if (!selectedCharacter) return;
+    if (selectedCharacters.length === 0) return;
 
     const mapElement = document.getElementById("map");
     if (!mapElement) return;
 
     const mapRect = mapElement.getBoundingClientRect();
-    const newX = ((event.clientX - mapRect.left) / mapRect.width) * 100;
-    const newY = ((event.clientY - mapRect.top) / mapRect.height) * 100;
+    const baseX = ((event.clientX - mapRect.left) / mapRect.width) * 100;
+    const baseY = ((event.clientY - mapRect.top) / mapRect.height) * 100;
 
-    // Frissítsük a helyi állapotot az animációhoz
-    setLocalCharacters((prev) =>
-      prev.map((char) =>
-        char.id === selectedCharacter ? { ...char, x: newX, y: newY } : char
-      )
-    );
+    const positions = calculateTrianglePositions(baseX, baseY, selectedCharacters.length);
 
-    // Várjunk egy kicsit az animáció befejezéséhez
+    const updates = selectedCharacters.map((charId, index) => {
+      const { x, y } = positions[index];
+
+      setLocalCharacters((prev) =>
+        prev.map((char) => (char.id === charId ? { ...char, x, y } : char))
+      );
+
+      return { charId, x, y };
+    });
+
     setTimeout(async () => {
       try {
-        const characterRef = doc(db, "mapCharacters", selectedCharacter);
-        await updateDoc(characterRef, { x: newX, y: newY });
+        for (const update of updates) {
+          const characterRef = doc(db, "mapCharacters", update.charId);
+          await updateDoc(characterRef, { x: update.x, y: update.y });
+        }
       } catch (error) {
-        console.error("❌ Hiba történt a karakter mozgatásakor:", error);
+        console.error("❌ Hiba történt a karakterek mozgatásakor:", error);
       }
 
-      setSelectedCharacter(null);
-    }, 500); // Az animáció időtartamához igazítva
+      setSelectedCharacters([]);
+    }, 500);
+  };
+
+  const handleCharacterClick = (e: React.MouseEvent, charId: string) => {
+    e.stopPropagation();
+    setSelectedCharacters((prev) =>
+      prev.includes(charId)
+        ? prev.filter((id) => id !== charId)
+        : [...prev, charId]
+    );
+  };
+
+  const calculateCharacterSize = () => {
+    const baseSize = 18;
+    const size = baseSize / zoomScale;
+    return Math.max(12, size);
   };
 
   return (
@@ -94,30 +144,33 @@ const MapPage: React.FC = () => {
             }}
             onClick={handleMapClick}
           >
-            {localCharacters.map((char) => (
-              <Box
-                key={char.id}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedCharacter(char.id);
-                }}
-                sx={{
-                  position: "absolute",
-                  left: `${char.x}%`,
-                  top: `${char.y}%`,
-                  width: `${Math.min(24, Math.max(12, 14 * (0.6 + zoomScale / 4)))}px`,
-                  height: `${Math.min(24, Math.max(12, 14 * (0.6 + zoomScale / 4)))}px`,
-                  backgroundImage: `url('${char.image}')`,
-                  backgroundSize: "cover",
-                  borderRadius: "50%",
-                  border: `1px solid ${char.color}`,
-                  cursor: "pointer",
-                  transform: "translate(-50%, -50%)",
-                  transition: "left 0.5s linear, top 0.5s linear", // 🔄 Animált mozgás
-                  boxShadow: selectedCharacter === char.id ? "0px 0px 10px #FFD700" : "none",
-                }}
-              />
-            ))}
+            {localCharacters.map((char) => {
+              const isSelected = selectedCharacters.includes(char.id);
+              const size = calculateCharacterSize();
+
+              return (
+                <Box
+                  key={char.id}
+                  onClick={(e) => handleCharacterClick(e, char.id)}
+                  sx={{
+                    position: "absolute",
+                    left: `${char.x}%`,
+                    top: `${char.y}%`,
+                    width: `${size}px`,
+                    height: `${size}px`,
+                    backgroundImage: `url('${char.image}')`,
+                    backgroundSize: "cover",
+                    borderRadius: "50%",
+                    border: `1px solid ${char.color}`,
+                    cursor: "pointer",
+                    transform: "translate(-50%, -50%)",
+                    transition: "left 0.5s linear, top 0.5s linear",
+                    boxShadow: isSelected ? "0px 0px 15px yellow" : "none",
+                    zIndex: isSelected ? 10 : 1,
+                  }}
+                />
+              );
+            })}
           </Box>
         </TransformComponent>
       </TransformWrapper>

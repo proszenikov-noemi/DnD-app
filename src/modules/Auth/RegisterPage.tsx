@@ -5,7 +5,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { Box, TextField, Button, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
-import FallingLeaves from "../../components/FallingLeaves"; // 🍃 Falevelek effekt importálása
+import FallingLeaves from "../../components/FallingLeaves";
 
 const RegisterPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -20,14 +20,19 @@ const RegisterPage: React.FC = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // 🔹 Felhasználó Firestore-ban mentése
+      // 🔹 Felhasználói adatok mentése Firestore-ba
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         username: username,
         email: user.email,
       });
 
-      // 🔹 Automatikusan generál egy karaktert a felhasználónak
+      // 🔹 Felhasználónév -> email mapping mentése
+      await setDoc(doc(db, "usernames", username), {
+        email: user.email,
+      });
+
+      // 🔹 Alapértelmezett karakter létrehozása
       const characterRef = doc(db, "characters", user.uid);
       await setDoc(characterRef, {
         name: "Új Kalandor",
@@ -47,7 +52,7 @@ const RegisterPage: React.FC = () => {
         },
       });
 
-      navigate("/profile"); // 🔹 Sikeres regisztráció után átirányít a profil oldalra
+      navigate("/profile");
     } catch (err) {
       setError("Hiba történt a regisztráció során!");
     }
@@ -58,7 +63,6 @@ const RegisterPage: React.FC = () => {
       sx={{
         width: "100vw",
         height: "100vh",
-        position: "relative",
         backgroundImage: `url('/HomePageBackground.webp')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
@@ -66,11 +70,10 @@ const RegisterPage: React.FC = () => {
         justifyContent: "center",
         alignItems: "center",
         padding: 2,
-        overflow: "hidden",
+        position: "relative",
       }}
     >
-      <FallingLeaves /> {/* 🍃 Falevelek háttérben */}
-
+      <FallingLeaves />
       <Box
         sx={{
           backgroundColor: "rgba(0, 0, 0, 0.7)",
@@ -80,36 +83,24 @@ const RegisterPage: React.FC = () => {
           width: "100%",
           boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.8)",
           textAlign: "center",
-          position: "relative",
           zIndex: 2,
         }}
       >
-        <Typography
-          variant="h4"
-          sx={{
-            color: "#ffffff",
-            fontFamily: "'MedievalSharp', serif",
-            textShadow: "2px 2px 5px rgba(0, 0, 0, 0.7)",
-            marginBottom: 4,
-          }}
-        >
+        <Typography variant="h4" sx={{ color: "#ffffff", marginBottom: 4 }}>
           Regisztráció
         </Typography>
-        {error && (
-          <Typography color="error" sx={{ marginBottom: 2 }}>
-            {error}
-          </Typography>
-        )}
+
+        {error && <Typography color="error" sx={{ marginBottom: 2 }}>{error}</Typography>}
+
         <Box component="form" onSubmit={handleRegister} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <TextField label="Felhasználónév" fullWidth value={username} onChange={(e) => setUsername(e.target.value)} />
           <TextField label="Email" fullWidth value={email} onChange={(e) => setEmail(e.target.value)} />
           <TextField label="Jelszó" type="password" fullWidth value={password} onChange={(e) => setPassword(e.target.value)} />
-          <Button type="submit" variant="contained" fullWidth>
-            Regisztráció
-          </Button>
+          <Button type="submit" variant="contained" fullWidth>Regisztráció</Button>
         </Box>
-        <Typography variant="body2" align="center" sx={{ marginTop: 3, color: "#ffffff" }}>
-          Már van fiókod? <Link to="/login">Lépj be itt!</Link>
+
+        <Typography variant="body2" sx={{ marginTop: 3, color: "#ffffff" }}>
+          Már van fiókod? <Link to="/login" style={{ color: "#f4a261" }}>Lépj be itt!</Link>
         </Typography>
       </Box>
     </Box>
