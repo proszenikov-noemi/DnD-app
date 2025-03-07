@@ -1,27 +1,61 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Button, Typography } from "@mui/material";
-import FallingLeaves from "../components/FallingLeaves"; // 🔹 Levelek animáció importálása
+import FallingLeaves from "../shared/styles/FallingLeaves"; // 🔹 Levelek animáció importálása
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
+
+  // Görgetés tiltása oldal betöltéskor
+  useEffect(() => {
+    document.body.style.overflow = "hidden"; // 🔹 Scroll teljes tiltása
+
+    return () => {
+      document.body.style.overflow = "auto"; // 🔹 Takarítás, ha elnavigálnak
+    };
+  }, []);
 
   return (
     <Box
       sx={{
         width: "100vw",
         height: "100vh",
+        position: "fixed", // 🔹 Fontos, hogy ne legyen görgetés
+        top: 0,
+        left: 0,
+        overflow: "hidden", // 🔹 Plusz biztosítás, hogy semmi ne lógjon ki
         backgroundImage: `url('/HomePageBackground.webp')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        position: "relative",
-        padding: 2,
+        padding: 0,
+        margin: 0,
       }}
     >
       <FallingLeaves /> {/* 🔹 Levelek animáció hozzáadása */}
+
+                  {/* 🔴 Fejlesztés alatti figyelmeztetés */}
+                  <Box
+                     sx={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      backgroundColor: "rgba(255, 0, 0, 0.8)",
+                      color: "#fff",
+                      textAlign: "center",
+                      padding: "10px 0",
+                      fontWeight: "bold",
+                      fontSize: "16px",
+                      zIndex: 5,
+                      fontFamily: "'MedievalSharp', serif",
+                     }}
+                  >
+                      ⚠️ Az oldal jelenleg fejlesztés alatt áll, a felhasználók nem léphetnek be ideiglenesen! ⚠️
+                  </Box>   
 
       <Box
         sx={{
@@ -29,7 +63,7 @@ const HomePage: React.FC = () => {
           borderRadius: "15px",
           padding: "30px",
           maxWidth: "500px",
-          width: "100%",
+          width: "90%",
           textAlign: "center",
           boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.8)",
           zIndex: 2, // 🔹 A levelek alatt jelenjen meg
@@ -60,7 +94,6 @@ const HomePage: React.FC = () => {
         <Box display="flex" flexDirection="column" gap={2}>
           <Button
             variant="contained"
-            color="primary"
             onClick={() => navigate("/login")}
             sx={{
               backgroundColor: "#f4a261",
@@ -77,7 +110,6 @@ const HomePage: React.FC = () => {
           </Button>
           <Button
             variant="contained"
-            color="secondary"
             onClick={() => navigate("/register")}
             sx={{
               backgroundColor: "#2a9d8f",

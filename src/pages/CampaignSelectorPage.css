@@ -1,0 +1,193 @@
+.campaign-selector-page {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    text-align: center;
+    background: linear-gradient(to bottom, #1a1a1a, #222);
+    color: white;
+    overflow: hidden;
+}
+
+.campaign-title {
+    font-size: 3rem;
+    margin-top: 20px;
+    margin-bottom: 40px;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+}
+
+.campaign-carousel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    height: 600px;
+    overflow: hidden;
+}
+
+.campaign-track {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: transform 0.5s ease;
+    height: 100%;
+}
+
+.campaign-card {
+    position: absolute;
+    width: 340px;
+    height: 520px;
+    background: rgba(0, 0, 0, 0.85);
+    border: 2px solid #f4a261;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    text-align: center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+    
+}
+
+.campaign-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40%; /* Csak az alsó részt fedi */
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+    pointer-events: none; /* Ne takarja a kattintható elemeket */
+}
+
+.campaign-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Alsó átmenetes sötétítés */
+.campaign-card .image-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 15px;
+    box-sizing: border-box;
+    color: white;
+    z-index: 2;
+    font-family: 'MedievalSharp', cursive;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 5px;
+}
+
+.campaign-card .image-overlay h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #f4a261;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+}
+
+.campaign-card .image-overlay p {
+    margin: 5px 0 0;
+    font-size: 1rem;
+    color: #ddd;
+    text-align: center;
+}
+
+
+/* Bal felső sarok: DM neve */
+.dm-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #f4a261;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    z-index: 10;
+    font-family: 'MedievalSharp', cursive;
+}
+
+/* Jobb felső sarok: Karakter szint */
+.level-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #f4a261; /* Ezzel az egész badge szövege azonos színű lesz */
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    z-index: 10;
+    text-align: center;
+    font-family: 'MedievalSharp', cursive;
+}
+
+/* Ha külön akarod szabályozni a "Karakter szint:" feliratot */
+.level-badge .badge-title {
+    font-weight: bold;
+    font-size: 0.75rem;
+    color: #f4a261; /* Azonos szín a DM kiíráséval */
+}
+
+/* Ha külön akarod szabályozni a konkrét szint értéket */
+.level-badge .badge-value {
+    font-size: 0.9rem;
+    color: #f4a261; /* Azonos szín a többi kiírással */
+}
+
+
+/* Navigációs gombok */
+.carousel-button {
+    background: none;
+    border: none;
+    font-size: 3rem;
+    color: #f4a261;
+    cursor: pointer;
+    z-index: 5;
+    user-select: none;
+    transition: transform 0.2s ease;
+}
+
+.carousel-button:hover {
+    transform: scale(1.2);
+}
+
+.left {
+    position: absolute;
+    left: 5%;
+}
+
+.right {
+    position: absolute;
+    right: 5%;
+}
+
+/* Kijelentkezés gomb */
+.logout-button {
+    margin-top: 20px;
+    padding: 12px 24px;
+    background-color: #f4a261;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.logout-button:hover {
+    background-color: #e76f51;
+}
