@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { db, auth } from '../../shared/utils/firebase';
 import { useNavigate } from 'react-router-dom';
+import './AdminDashboard.css';  // CSS importálás
 
 interface Player {
     uid: string;
@@ -65,13 +66,13 @@ const AdminDashboardPage: React.FC = () => {
     };
 
     return (
-        <div>
-            <h1>Admin Dashboard - Kampányok kezelése</h1>
-            <button onClick={handleLogout}>Kijelentkezés</button>
+        <div className="admin-dashboard-container">
+            <h1 className="admin-dashboard-title">Admin Dashboard - Kampányok kezelése</h1>
+            <button className="admin-logout-button" onClick={handleLogout}>Kijelentkezés</button>
             {campaigns.map(campaign => (
-                <div key={campaign.id} style={{ marginBottom: '30px' }}>
-                    <h2 style={{ textDecoration: 'underline' }}>{campaign.name} Kampány</h2>
-                    <table border={1} cellPadding={5}>
+                <div key={campaign.id} className="campaign-section">
+                    <h2 className="campaign-title">{campaign.name} Kampány</h2>
+                    <table className="admin-table">
                         <thead>
                             <tr>
                                 <th>Felhasználónév</th>
@@ -81,16 +82,16 @@ const AdminDashboardPage: React.FC = () => {
                         </thead>
                         <tbody>
                             {campaign.players.map(player => (
-                                <tr key={player.uid}>
+                                <tr key={player.uid} className={player.role === 'dm' ? 'dm-role' : ''}>
                                     <td>{player.username}</td>
-                                    <td>{player.role}</td>
+                                    <td className={player.role === 'dm' ? 'dm-text' : ''}>{player.role}</td>
                                     <td>
                                         <select
                                             value={player.role}
                                             onChange={(e) => handleRoleChange(campaign.id, player.uid, e.target.value)}
                                         >
                                             <option value="user">Játékos</option>
-                                            <option value="dm">Dungeon Master</option>
+                                            <option value="dm" className="dm-option">Dungeon Master</option>
                                         </select>
                                     </td>
                                 </tr>

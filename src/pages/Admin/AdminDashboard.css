@@ -1,0 +1,107 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'MedievalSharp', cursive;
+    background: linear-gradient(to bottom, #1a1a1a, #222);
+    color: white;
+}
+
+.admin-dashboard-container {
+    padding: 20px;
+    text-align: center;
+}
+
+.admin-dashboard-title {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: #f4a261;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+.admin-logout-button {
+    background-color: #f4a261;
+    color: #1a1a1a;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-bottom: 30px;
+    transition: background-color 0.3s;
+}
+
+.admin-logout-button:hover {
+    background-color: #e76f51;
+    color: white;
+}
+
+.campaign-section {
+    margin-bottom: 30px;
+    padding: 15px;
+    border: 2px solid #f4a261;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+    text-align: left;
+    width: 60%; /* Keskenyebb kampányblokk */
+    margin: 0 auto; /* Középre igazítás */
+}
+
+.campaign-title {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+    color: #f4a261;
+    text-decoration: underline;
+    text-align: center;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 10px;
+    border: 1px solid #f4a261;
+    text-align: center;
+    font-size: 1rem;
+}
+
+/* Fejléc */
+.admin-table th {
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #f4a261;
+}
+
+/* Dungeon Master szöveg kiemelés a táblázat cellában */
+.admin-table .dm-text {
+    color: #f4a261;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(244, 162, 97, 0.8);
+}
+
+/* Select mező */
+.admin-table select {
+    padding: 5px;
+    border-radius: 5px;
+    background-color: #f4a261;
+    border: none;
+    cursor: pointer;
+    font-family: 'MedievalSharp', cursive;
+}
+
+/* Select mező fókuszállapot */
+.admin-table select:focus {
+    outline: none;
+    box-shadow: 0 0 5px #f4a261;
+}
+
+/* Select menüben a Dungeon Master opció kiemelése */
+.admin-table select option.dm-option {
+    background-color: rgba(228, 148, 36, 0.9);
+    color: black;
+    font-weight: bold;
+}
