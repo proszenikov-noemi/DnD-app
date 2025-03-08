@@ -56,18 +56,45 @@ body {
     text-align: center;
 }
 
-.admin-table {
+/* Reszponzív táblázat konténer */
+.table-wrapper {
     width: 100%;
-    border-collapse: collapse;
+    overflow-x: auto;  /* Ha a táblázat szélesebb, görgethetővé válik */
+    max-width: 100%;
     margin-top: 10px;
 }
 
+.admin-table {
+    width: 100%;
+    max-width: 100%;
+    border-collapse: collapse;
+    table-layout: auto; /* A táblázat oszlopai rugalmasak legyenek */
+}
+
+/* Mobil optimalizáció - ha kell, kisebb betűméret */
+@media screen and (max-width: 768px) {
+    .admin-table th, .admin-table td {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+}
+
+/* Táblázat oszlopok méretének beállítása */
 .admin-table th,
 .admin-table td {
     padding: 10px;
     border: 1px solid #f4a261;
     text-align: center;
     font-size: 1rem;
+    white-space: nowrap; /* A szövegek ne törjenek meg */
+}
+
+/* A művelet oszlop (Művelet) szélessége */
+.admin-table th:last-child,
+.admin-table td:last-child {
+    width: 20%; /* Dinamikus, de nem túl széles */
+    min-width: 120px; /* Minimum szélesség, hogy a gombok elférjenek */
+    text-align: center;
 }
 
 /* Fejléc */
@@ -83,7 +110,7 @@ body {
     text-shadow: 0 0 5px rgba(244, 162, 97, 0.8);
 }
 
-/* Select mező */
+/* Gombok a művelet oszlopban */
 .admin-table select {
     padding: 5px;
     border-radius: 5px;
@@ -91,6 +118,22 @@ body {
     border: none;
     cursor: pointer;
     font-family: 'MedievalSharp', cursive;
+    max-width: 100%;
+}
+
+/* Ha a képernyő túl kicsi, akkor a művelet oszlop jobban összemegy */
+@media screen and (max-width: 768px) {
+    .admin-table th,
+    .admin-table td {
+        font-size: 0.85rem; /* Kisebb betűméret */
+        padding: 6px;
+    }
+
+    .admin-table th:last-child,
+    .admin-table td:last-child {
+        width: auto; /* A művelet oszlop mérete rugalmas legyen */
+        min-width: 100px;
+    }
 }
 
 /* Select mező fókuszállapot */

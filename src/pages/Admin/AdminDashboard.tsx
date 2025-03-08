@@ -72,11 +72,12 @@ const AdminDashboardPage: React.FC = () => {
             {campaigns.map(campaign => (
                 <div key={campaign.id} className="campaign-section">
                     <h2 className="campaign-title">{campaign.name} Kampány</h2>
+                 <div className="tablewrapper">
                     <table className="admin-table">
                         <thead>
                             <tr>
-                                <th>Felhasználónév</th>
-                                <th>Szerepkör</th>
+                                <th>Név</th>
+                                <th>Szerep</th>
                                 <th>Művelet</th>
                             </tr>
                         </thead>
@@ -98,6 +99,7 @@ const AdminDashboardPage: React.FC = () => {
                             ))}
                         </tbody>
                     </table>
+                 </div>
                 </div>
             ))}
         </div>
