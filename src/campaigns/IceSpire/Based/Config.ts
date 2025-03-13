@@ -1,37 +1,37 @@
 import { lazy } from 'react';
 
 // Player oldalak
-const IcespirePlayerHomePage = lazy(() => import('./player/PlayerHomePage'));
-const IcespireCharacterSheetPage = lazy(() => import('./player/CharacterSheet/CharacterSheetPage'));
-const IcespireCombatPage = lazy(() => import('./player/Combat/CombatPage'));
-const IcespireMapPage = lazy(() => import('./player/Map/MapPage'));
-const IcespireProfilePage = lazy(() => import('./player/ProfilePage'));
-const IcespireTeamPage = lazy(() => import('./player/TeamPage'));
-const IcespireKnowledgePage = lazy(() => import('./player/KnowledgePage'));
-const IcespireLoot = lazy(() => import('./player/LootPage'));
-const IcespireRoad = lazy(() => import('./player/RoadPage'));
-const IcespirePlayerNotes = lazy(() => import('./player/NotesPage'));
-const IcespirePlayerPicture = lazy(() => import('./player/PicturePage'));
-const IcespirePlayerQuest = lazy(() => import('./player/QuestPage'));
+const IcespirePlayerHomePage = lazy(() => import('../player/PlayerHomePage'));
+const IcespireCharacterSheetPage = lazy(() => import('../player/CharacterSheet/CharacterSheetPage'));
+const IcespireCombatPage = lazy(() => import('../player/Combat/CombatPage'));
+const IcespireMapPage = lazy(() => import('../player/Map/MapPage'));
+const IcespireProfilePage = lazy(() => import('../player/ProfilePage'));
+const IcespireTeamPage = lazy(() => import('../player/TeamPage'));
+const IcespireKnowledgePage = lazy(() => import('../player/KnowledgePage'));
+const IcespireLoot = lazy(() => import('../player/LootPage'));
+const IcespireRoad = lazy(() => import('../player/RoadPage'));
+const IcespirePlayerNotes = lazy(() => import('../player/NotesPage'));
+const IcespirePlayerPicture = lazy(() => import('../player/PicturePage'));
+const IcespirePlayerQuest = lazy(() => import('../player/QuestPage'));
 
 // Közös oldalak
-const IcespireChatPage = lazy(() => import('./shared/IceChatPage'));
-const IcespireShop = lazy(() => import('./shared/IceShop'));
-const IcespireSchedule = lazy(() => import('./shared/IceSchedulePage'));
+const IcespireChatPage = lazy(() => import('../shared/IceChatPage'));
+const IcespireShop = lazy(() => import('../shared/IceShop'));
+const IcespireSchedule = lazy(() => import('../shared/IceSchedulePage'));
 
 // DM oldalak
-const IcespireDmDashboard = lazy(() => import('./dm/DmDashboard'));
-const IcespireMapEditorPage = lazy(() => import('./dm/DmMapEditor'));
-const IcespireStoryPage = lazy(() => import('./dm/DmStoryManager'));
-const IcespireCombatManagerPage = lazy(() => import('./dm/DmCombatControl'));
-const IcespireNpcManagementPage = lazy(() => import('./dm/DmNpcManager'));
-const IcespireInventory = lazy(() => import('./dm/DmInventory'));
-const IcespireKnowledge = lazy(() => import('./dm/DmKnowledgePage'));
-const IcespirePicture = lazy(() => import('./dm/DmPicture'));
-const IcespireTeam = lazy(() => import('./dm/DmTeamPage'));
-const IcespireNotes = lazy(() => import('./dm/DmNotes'));
-const IcespireQuest = lazy(() => import('./dm/DmQuest'));
-const IcespireDmProfile = lazy(() => import('./dm/DmProfile'));
+const IcespireDmDashboard = lazy(() => import('../dm/DmDashboard'));
+const IcespireMapEditorPage = lazy(() => import('../dm/DmMapEditor'));
+const IcespireStoryPage = lazy(() => import('../dm/DmStoryManager'));
+const IcespireCombatManagerPage = lazy(() => import('../dm/DmCombatControl'));
+const IcespireNpcManagementPage = lazy(() => import('../dm/DmNpcManager'));
+const IcespireInventory = lazy(() => import('../dm/DmInventory'));
+const IcespireKnowledge = lazy(() => import('../dm/DmKnowledgePage'));
+const IcespirePicture = lazy(() => import('../dm/DmPicture'));
+const IcespireTeam = lazy(() => import('../dm/DmTeamPage'));
+const IcespireNotes = lazy(() => import('../dm/DmNotes'));
+const IcespireQuest = lazy(() => import('../dm/DmQuest'));
+const IcespireDmProfile = lazy(() => import('../dm/DmProfile'));
 
 export const icespireRoutes = [
     // Player oldalak

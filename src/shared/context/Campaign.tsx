@@ -1,6 +1,6 @@
 // campaigns/CampaignList.ts
-import IceSpireCampaignConfig from '../../campaigns/IceSpire/IceSpire';
-import WitchLightCampaignConfig from '../../campaigns/WitchLight/WitchLight';
+import IceSpireCampaignConfig from '../../campaigns/IceSpire/Based/IceSpire';
+import WitchLightCampaignConfig from '../../campaigns/WitchLight/Based/WitchLight';
 
 const campaigns = [
     IceSpireCampaignConfig,

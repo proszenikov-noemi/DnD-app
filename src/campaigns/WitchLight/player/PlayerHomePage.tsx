@@ -6,7 +6,7 @@ const WitchLightPlayerHomePage: React.FC = () => {
     const { campaign } = useCampaign();
 
     return (
-        <div>
+        <div className="page-content">
             <NavigationBar />
             <h1>Üdvözöllek az {campaign} kampányban - Játékos Nézet!</h1>
         </div>

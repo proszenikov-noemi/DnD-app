@@ -1,0 +1,380 @@
+/* Általános beállítások */
+.navigation-bar {
+    background: linear-gradient(to bottom, #2b5876, #4e4376);
+    padding: 0; /* 🔥 Eltávolít minden belső térközt */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    border-radius: 0;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    height: 60px;
+}
+
+/* 🔹 Az oldal tartalmának eltolása, hogy ne takarja ki a navigációs sáv */
+.page-content {
+    padding-top: 100px; /* 🔥 A navbar magasságának megfelelő hely biztosítása */
+}
+
+/* Kampányválasztó */
+.campaign-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+
+.campaign-button {
+    position: relative;
+    width: 230px; /* A kép szélessége */
+    height: 75px; /* A nav bar magassága */
+    border: none;
+    cursor: pointer;
+    background: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+
+.campaign-image {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    position: absolute;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    border-right: 5px solid rgba(255, 255, 255, 0.2); /* Finom fehér keret */
+    box-shadow: 10px 0px 20px rgba(0, 0, 0, 0.4); /* Lágy jobb oldali árnyék */
+}
+
+.campaign-name {
+    position: absolute;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    text-shadow: 3px 3px 8px rgba(255, 255, 255, 0.3), 2px 2px 5px rgba(0, 0, 0, 0.8);
+    z-index: 2;
+    text-align: center;
+    width: 100%;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.3); /* Enyhe sötét áttetsző háttér */
+    padding: 8px 0px;
+    font-family: "Cinzel", serif; /* Fantasy-stílusú betűtípus */
+    letter-spacing: 1px;
+    border-radius: 5px;
+}
+
+/* Kampányválasztó legördülő menü */
+.campaign-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    min-width: 220px;
+    padding: 10px 0;
+    overflow: hidden;
+}
+
+/* Kampányopció gomb */
+.campaign-option {
+    display: block;
+    cursor: pointer;
+    transition: 0.2s;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 10px; /* 🔥 Lekerekített sarkok */
+    border: 2px solid rgba(255, 255, 255, 0.5); /* 🔥 Finom fehér keret */
+    margin: 5px; /* 🔥 Távolság a gombok között */
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hover-effekt a kampányopcióra */
+.campaign-option:hover {
+    background: rgba(0, 0, 0, 0.2);
+    transform: scale(1.02); /* 🔥 Finom kiemelkedés hover esetén */
+}
+
+/* Kampányopció tartalma (kép + név) */
+.campaign-option-content {
+    position: relative;
+    width: 100%;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+/* Kampánykép a lenyíló menüben */
+.campaign-dropdown-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    left: 0;
+    border-radius: 8px;
+}
+
+/* Kampánynév a képre írva */
+.campaign-dropdown-name {
+    position: absolute;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.4);
+    padding: 5px 10px;
+    width: 100%;
+    text-align: center;
+    z-index: 2;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+
+/* Menü stílus */
+.menu-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Menü elemek */
+.menu-item {
+    position: relative;
+}
+
+.menu-link {
+    padding: 10px 15px;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 20px;
+    transition: 0.3s;
+}
+
+.menu-link:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Almenük */
+.submenu {
+    position: relative;
+}
+
+.submenu-button {
+    background: none;
+    border: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 10px 15px;
+    border-radius: 20px;
+    transition: 0.3s;
+    font-family: inherit;  /* 🔥 Ezzel az egész oldal alapértelmezett betűtípusa lesz */
+    font-size: 16px;       /* 🔥 Azonos méret, mint a többi menüpont */
+    text-transform: none;  /* 🔥 Ha az összes menüpont kis- vagy nagybetűs, igazítsd ehhez */
+}
+
+.submenu-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+
+.submenu-content {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    z-index: 1000;
+}
+
+.submenu-item {
+    padding: 10px 15px;
+    color: black;
+    font-weight: bold;
+    transition: 0.2s;
+    cursor: pointer;
+}
+
+.submenu-item:hover {
+    background: #8ac3f5;
+}
+
+.submenu-link {
+    text-decoration: none;
+    color: black;
+}
+
+/* Hamburger menü */
+.hamburger-menu {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.hamburger-menu:hover {
+    transform: scale(1.1);
+}
+
+/* Mobil menü alapstílus */
+.mobile-menu {
+    position: absolute;
+    top: 60px;
+    right: 10px;
+    background: linear-gradient(to bottom, #2b5876, #4e4376); /* 🔥 Ugyanaz, mint a főmenü */
+    width: 220px;
+    border-radius: 10px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    z-index: 1000;
+    padding: 10px 0;
+}
+
+.mobile-menu a,
+.mobile-submenu-button {
+    color: white; /* 🔥 Fehér szöveg a sötét háttéren */
+    font-weight: bold;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.mobile-menu a:hover,
+.mobile-submenu-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+
+
+.mobile-menu-link {
+    display: block;
+    padding: 10px;
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+
+.mobile-menu-link:hover {
+    background: #8ac3f5;
+}
+
+.mobile-submenu {
+    position: relative;
+}
+
+.mobile-submenu-button {
+    background: none;
+    border: none;
+    font-weight: bold;
+    color: #d4ecff;
+    cursor: pointer;
+    padding: 10px 15px;
+    text-align: left;
+    width: 100%;
+    font-family: inherit;  /* 🔥 Ezzel az egész oldal alapértelmezett betűtípusa lesz */
+    font-size: 16px;       /* 🔥 Azonos méret, mint a többi menüpont */
+    text-transform: none;  /* 🔥 Ha az összes menüpont kis- vagy nagybetűs, igazítsd ehhez */
+}
+
+.mobile-submenu-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+
+.mobile-submenu-content {
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(to bottom, #2b5876, #4b4376);
+    padding: 5px 0;
+    border-radius: 8px;
+    position: relative;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.mobile-submenu-link {
+    display: block;
+    padding: 10px;
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.mobile-submenu-link:hover {
+    background: #8ac3f5;
+    color: white;
+}
+
+
+/* 🔹 Kijelentkezés gomb stílus mobil nézetben */
+.mobile-logout-button {
+    background: #FF6B6B; /* 🔥 Pirosas, enyhén kiemelkedő, de nem túl erős */
+    color: white;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 8px;
+    margin-top: 10px;
+    transition: 0.3s;
+}
+
+.mobile-logout-button:hover {
+    background: #D64545; /* 🔥 Sötétebb piros hover effekt */
+}
+
+
+/* 🔹 Animációk */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* Kijelentkezés ikon */
+.logout-container {
+    display: flex;
+    align-items: center;
+}
+
+.logout-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+}
+
+.logout-button:hover {
+    transform: scale(1.1);
+}
+
+.logout-icon {
+    color: white;
+    font-size: 20px;
+}

@@ -8,8 +8,8 @@ import AdminDashboard from './pages/Admin/AdminDashboard';
 import CampaignSelectorPage from './pages/CampaignSelectorPage';
 
 // Kampányok dinamikus importja
-import { icespireRoutes } from './campaigns/IceSpire/Config';
-import { witchlightRoutes } from './campaigns/WitchLight/Config';
+import { icespireRoutes } from './campaigns/IceSpire/Based/Config';
+import { witchlightRoutes } from './campaigns/WitchLight/Based/Config';
 
 // Segédfüggvény a submenu-k kicsomagolására
 const flattenRoutes = (routes: any[]) => {

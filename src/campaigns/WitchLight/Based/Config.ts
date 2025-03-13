@@ -1,39 +1,39 @@
 import { lazy } from 'react';
 
 // Player oldalak
-const WitchlightPlayerHomePage = lazy(() => import('./player/PlayerHomePage'));
-const WitchlightCharacterSheetPage = lazy(() => import('./player/CharacterSheet/CharacterSheetPage'));
-const WitchlightCombatPage = lazy(() => import('./player/Combat/CombatPage'));
-const WitchlightMapPage = lazy(() => import('./player/Map/MapPage'));
-const WitchlightProfilePage = lazy(() => import('./player/ProfilePage'));
-const WitchlightTeamPage = lazy(() => import('./player/TeamPage'));
-const WitchlightKnowledgePage = lazy(() => import('./player/KnowledgePage'));
-const WitchlightLoot = lazy(() => import('./player/LootPage'));
-const WitchlightRoad = lazy(() => import('./player/RoadPage'));
-const WitchlightPlayerNotes = lazy(() => import('./player/NotesPage'));
-const WitchlightPlayerPicture = lazy(() => import('./player/PicturePage'));
-const WitchlightPlayerQuest = lazy(() => import('./player/QuestPage'));
+const WitchlightPlayerHomePage = lazy(() => import('../player/PlayerHomePage'));
+const WitchlightCharacterSheetPage = lazy(() => import('../player/CharacterSheet/CharacterSheetPage'));
+const WitchlightCombatPage = lazy(() => import('../player/Combat/CombatPage'));
+const WitchlightMapPage = lazy(() => import('../player/Map/MapPage'));
+const WitchlightProfilePage = lazy(() => import('../player/ProfilePage'));
+const WitchlightTeamPage = lazy(() => import('../player/TeamPage'));
+const WitchlightKnowledgePage = lazy(() => import('../player/KnowledgePage'));
+const WitchlightLoot = lazy(() => import('../player/LootPage'));
+const WitchlightRoad = lazy(() => import('../player/RoadPage'));
+const WitchlightPlayerNotes = lazy(() => import('../player/NotesPage'));
+const WitchlightPlayerPicture = lazy(() => import('../player/PicturePage'));
+const WitchlightPlayerQuest = lazy(() => import('../player/QuestPage'));
 
 
 // Közös oldalak
-const WitchlightChatPage = lazy(() => import('./shared/WitchChatPage'));
-const WitchlightShop = lazy(() => import('./shared/WitchShop'));
-const WitchlightSchedule = lazy(() => import('./shared/WitchSchedulePage'));
+const WitchlightChatPage = lazy(() => import('../shared/WitchChatPage'));
+const WitchlightShop = lazy(() => import('../shared/WitchShop'));
+const WitchlightSchedule = lazy(() => import('../shared/WitchSchedulePage'));
 
 
 // DM oldalak
-const WitchlightDmDashboard = lazy(() => import('./dm/DmDashboard'));
-const WitchlightMapEditorPage = lazy(() => import('./dm/DmMapEditor'));
-const WitchlightStoryPage = lazy(() => import('./dm/DmStoryManager'));
-const WitchlightCombatManagerPage= lazy(() => import('./dm/DmCombatControl'));
-const WitchlightNpcManagementPage= lazy(() => import('./dm/DmNpcManager'));
-const WitchlightInventory= lazy(() => import('./dm/DmInventory'));
-const WitchlightKnowledge= lazy(() => import('./dm/DmKnowledgePage'));
-const WitchlightPicture= lazy(() => import('./dm/DmPicture'));
-const WitchlightTeam= lazy(() => import('./dm/DmTeamPage'));
-const WitchlightNotes= lazy(() => import('./dm/DmNotes'));
-const WitchlightQuest= lazy(() => import('./dm/DmQuest'));
-const WitchlightDmprofile= lazy (() => import('./dm/DmProfile'));
+const WitchlightDmDashboard = lazy(() => import('../dm/DmDashboard'));
+const WitchlightMapEditorPage = lazy(() => import('../dm/DmMapEditor'));
+const WitchlightStoryPage = lazy(() => import('../dm/DmStoryManager'));
+const WitchlightCombatManagerPage= lazy(() => import('../dm/DmCombatControl'));
+const WitchlightNpcManagementPage= lazy(() => import('../dm/DmNpcManager'));
+const WitchlightInventory= lazy(() => import('../dm/DmInventory'));
+const WitchlightKnowledge= lazy(() => import('../dm/DmKnowledgePage'));
+const WitchlightPicture= lazy(() => import('../dm/DmPicture'));
+const WitchlightTeam= lazy(() => import('../dm/DmTeamPage'));
+const WitchlightNotes= lazy(() => import('../dm/DmNotes'));
+const WitchlightQuest= lazy(() => import('../dm/DmQuest'));
+const WitchlightDmprofile= lazy (() => import('../dm/DmProfile'));
 
 
 export const witchlightRoutes = [

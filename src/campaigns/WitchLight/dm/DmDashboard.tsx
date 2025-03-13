@@ -6,7 +6,7 @@ const WitchlightDmDashboard: React.FC = () => {
     const { campaign } = useCampaign();
 
     return (
-        <div>
+        <div className="page-content">
             <NavigationBar />
             <h1>Üdvözöllek az {campaign} kampányban - DM Nézet!</h1>
             <p>Itt fogja látni a Dm a kezdöoldalát, ahol nagyban átfogoan össze lesz foglalva a kampánya és a játékosai</p>

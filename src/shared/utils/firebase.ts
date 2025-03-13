@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
+import { getFirestore, initializeFirestore, persistentLocalCache } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
     apiKey: "AIzaSyAy37pkUzDsYqDvgIsNSl1SXyTWVhZd_9Q",
@@ -13,5 +13,11 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+// 🔥 Firestore helyi cache beállítása az új ajánlott módon
+const db = initializeFirestore(app, {
+    localCache: persistentLocalCache()
+});
+
+const auth = getAuth(app);
+
+export { db, auth };

@@ -72,27 +72,31 @@ const CampaignSelectorPage: React.FC = () => {
                 <button className="carousel-button left" onClick={prevCampaign}>❮</button>
                 <div className="campaign-track">
                     {campaigns.map((campaign, index) => (
-
-                        <div className="campaign-card" style={getCardStyle(index)} onClick={() => handleSelectCampaign(campaign.id)}>
-                             {/* Jobb felső sarok - karakter szint */}
+                        <div 
+                            key={campaign.id || index}  // 🔥 Egyedi kulcs hozzáadása
+                            className="campaign-card" 
+                            style={getCardStyle(index)} 
+                            onClick={() => handleSelectCampaign(campaign.id)}
+                        >
+                            {/* Jobb felső sarok - karakter szint */}
                             <div className="card-badge level-badge">
                                 <div className="badge-title">Level:</div>
                                 <div className="badge-value">{campaign.level}</div>
                             </div>
 
-                            {/*  felső sarok - DM neve */}
+                            {/* Felső sarok - DM neve */}
                             <div className="card-badge dm-badge">
-                               <div className="badge-title">Dungeon Master</div>
-                               <div className="badge-value">{campaign.dm}</div>
+                                <div className="badge-title">Dungeon Master</div>
+                                <div className="badge-value">{campaign.dm}</div>
                             </div>
 
                             <img src={campaign.coverImage} alt={campaign.name} />
                             <div className="image-overlay">
-                            <h3>{campaign.name}</h3>
-                            {index === currentIndex && (
-                                <>
-                                <p>{campaign.description}</p>
-                                </>
+                                <h3>{campaign.name}</h3>
+                                {index === currentIndex && (
+                                    <>
+                                        <p>{campaign.description}</p>
+                                    </>
                                 )}
                             </div>
                         </div>

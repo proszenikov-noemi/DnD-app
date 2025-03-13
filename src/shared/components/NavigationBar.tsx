@@ -3,9 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCampaign } from '../../shared/context/CampaignContext';
 import { auth, db } from '../utils/firebase'; // Firebase szükséges a kampányadatok lekéréséhez
 import { doc, getDoc } from 'firebase/firestore';
-import { icespireRoutes } from '../../campaigns/IceSpire/Config';
-import { witchlightRoutes } from '../../campaigns/WitchLight/Config';
+import { icespireRoutes } from '../../campaigns/IceSpire/Based/Config';
+import { witchlightRoutes } from '../../campaigns/WitchLight/Based/Config';
 import campaigns from '../context/Campaign';
+import { FiLogOut } from 'react-icons/fi';
+
 
 interface SubMenuItem {
     label: string;
@@ -44,6 +46,32 @@ const NavigationBar: React.FC = () => {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+        // 🔥 Kampány-specifikus stílus betöltése
+        useEffect(() => {
+            const currentCampaignConfig = campaigns.find(c => c.id === campaign);
+            
+            if (currentCampaignConfig?.themeStylesheet) {
+                const existingTheme = document.getElementById('campaign-theme');
+        
+                if (existingTheme) {
+                    document.head.removeChild(existingTheme);
+                }
+        
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = currentCampaignConfig.themeStylesheet;
+                link.id = 'campaign-theme';
+                document.head.appendChild(link);
+            }
+        
+            return () => {
+                const existingTheme = document.getElementById('campaign-theme');
+                if (existingTheme) {
+                    document.head.removeChild(existingTheme);
+                }
+            };
+        }, [campaign]);  
 
     const campaignRoutes = getCampaignRoutes(campaign);
 
@@ -112,63 +140,51 @@ const NavigationBar: React.FC = () => {
     const filteredLinks = campaignRoutes.filter(route => route.role === role || route.role === 'both');
 
     return (
-        <nav style={{ padding: '10px', borderBottom: '1px solid black', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <nav className="navigation-bar" >
             {/* Kampányválasztó dropdown a bal oldalon */}
-            <div style={{ position: 'relative' }}>
-                <button onClick={toggleCampaignMenu}>
-                    Kampány: {campaign} ▼
-                </button>
-                {isCampaignMenuOpen && (
-                    <div style={{
-                        position: 'absolute',
-                        top: '100%',
-                        left: 0,
-                        background: 'white',
-                        border: '1px solid black',
-                        zIndex: 1000
-                    }}>
-                        {campaigns.map(camp => (
-                            <button
-                                key={camp.id}
-                                onClick={() => handleCampaignSwitch(camp.id)}
-                                style={{ display: 'block', padding: '5px 10px', textAlign: 'left', width: '100%' }}
-                            >
-                                {camp.name}
-                            </button>
-                        ))}
+            <div className="campaign-container">
+    <button className="campaign-button" onClick={toggleCampaignMenu}>
+        <img src={campaigns.find(c => c.id === campaign)?.navImage || '/default.jpg'} 
+             alt={campaign} 
+             className="campaign-image" />
+        <span className="campaign-name">{campaigns.find(c => c.id === campaign)?.name || 'Ismeretlen kampány'}</span> 
+    </button>
+    {isCampaignMenuOpen && (
+        <div className="campaign-dropdown">
+            {campaigns.map(camp => (
+                <div key={camp.id} className="campaign-option" onClick={() => handleCampaignSwitch(camp.id)}>
+                    <div className="campaign-option-content">
+                    <img src={camp.navImage} alt={camp.name} className="campaign-dropdown-image" />
+                    <span className="campaign-dropdown-name">{camp.name}</span>
                     </div>
-                )}
-            </div>
+                </div>
+            ))}
+        </div>
+    )}
+</div>
+
 
             {/* Navigációs menü */}
-            <div>
+            <div className="navigation-container">
                 {isMobile ? (
                     <>
-                        <button onClick={toggleMenu} style={{ marginLeft: '10px' }}>☰</button>
+                        <button className="hamburger-menu" onClick={toggleMenu} >☰</button>
                         {isMenuOpen && (
-                            <div style={{
-                                position: 'absolute',
-                                top: '50px',
-                                right: 0,
-                                width: '100%',
-                                background: 'white',
-                                border: '1px solid black',
-                                zIndex: 1000
-                            }}>
+                            <div className="mobile-menu">
                                 {filteredLinks.map((link) => (
                                     link.submenu ? (
-                                        <div key={link.label}>
-                                            <button onClick={() => toggleDropdown(link.label)} style={{ width: '100%', textAlign: 'left' }}>
+                                        <div key={link.label} className="mobile-submenu">
+                                            <button className="mobile-submenu-button" onClick={() => toggleDropdown(link.label)}>
                                                 {link.label}
                                             </button>
                                             {openDropdown === link.label && (
-                                                <div style={{ paddingLeft: '15px' }}>
+                                                <div className="mobile-submenu-content">
                                                     {link.submenu.map(subLink => (
                                                         <Link
                                                             key={subLink.path}
+                                                            className="mobile-submenu-link"
                                                             to={subLink.path}
                                                             onClick={toggleMenu}
-                                                            style={{ display: 'block', padding: '5px 0' }}
                                                         >
                                                             {subLink.label}
                                                         </Link>
@@ -177,34 +193,58 @@ const NavigationBar: React.FC = () => {
                                             )}
                                         </div>
                                     ) : (
-                                        <Link key={link.path} to={link.path!} onClick={toggleMenu} style={{ display: 'block', padding: '5px 0' }}>
+                                        <Link key={link.path} className="mobile-menu-link" to={link.path!} onClick={toggleMenu}>
                                             {link.label}
                                         </Link>
                                     )
                                 ))}
-                                <button onClick={handleLogout} style={{ width: '100%', textAlign: 'left' }}>Kijelentkezés</button>
+                                <button className="mobile-logout-button" onClick={handleLogout} >Kijelentkezés</button>
                             </div>
                         )}
                     </>
                 ) : (
                     <>
-                        {filteredLinks.map((link) => (
-                            link.submenu ? (
-                                <div key={link.label} style={{ display: 'inline-block', position: 'relative', marginRight: '10px' }}>
-                                    <button onClick={() => toggleDropdown(link.label)}>{link.label}</button>
-                                    {openDropdown === link.label && (
-                                        <div style={{ position: 'absolute', top: '100%', left: 0, background: 'white', border: '1px solid black' }}>
-                                            {link.submenu.map(subLink => (
-                                                <Link key={subLink.path} to={subLink.path} onClick={() => setOpenDropdown(null)}>{subLink.label}</Link>
-                                            ))}
-                                        </div>
-                                    )}
+                    {/* menupontok ikon*/}
+                    <div className="menu-container" >
+                      <div className="menu" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                       {filteredLinks.map(link => (
+                        link.submenu ? (
+                            <div key={link.label} className="submenu" >
+                                <button className="submenu-button" onClick={() => setOpenDropdown(openDropdown === link.label ? null : link.label)}>
+                                   {link.label} ▼
+                                </button>
+                                {openDropdown === link.label && (
+                                    <div className="submenu-content" >
+                                        {link.submenu.map(subLink => (
+                                            <div key={subLink.path} className="submenu-item" >
+                                                <Link className="submenu-link" to={subLink.path}>{subLink.label}</Link>
+                                            </div>
+                                    ))}
                                 </div>
-                            ) : (
-                                <Link key={link.path} to={link.path!} style={{ marginRight: '10px' }}>{link.label}</Link>
-                            )
-                        ))}
-                        <button onClick={handleLogout}>Kijelentkezés</button>
+                        )}    
+                    </div>
+                 ):(
+                    <div key={link.path} className="menu-item">
+                        <Link className="menu-link" to={link.path || "/"}>{link.label}</Link>
+                    </div>
+                 )
+                    ))}
+                </div>
+                {/* 🔥 A kijelentkezés ikon most pontosan egy sorban van a többi menüponttal */}
+                <div className="logout-container" >
+                  <button className="logout-button" onClick={handleLogout} style={{ 
+                    background: 'none',
+                    border: 'none', 
+                    cursor: 'pointer', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    marginTop: '-2px' /* 🔥 Enyhén feljebb tolja a logout ikont */
+                  }}>
+                    <FiLogOut className="logout-icon" size={20} />
+                  </button>
+                  </div>
+                </div>
                     </>
                 )}
             </div>

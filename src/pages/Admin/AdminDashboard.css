@@ -2,8 +2,6 @@ body {
     margin: 0;
     padding: 0;
     font-family: 'MedievalSharp', cursive;
-    background: linear-gradient(to bottom, #1a1a1a, #222);
-    color: white;
 }
 
 .admin-dashboard-container {
