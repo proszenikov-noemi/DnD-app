@@ -10,7 +10,7 @@ import InventoryTab from './InventoryTab/InventoryTab';
 import SpellsTab from './SpellsTab';
 import SkillsTab from './SkillsTab';
 import BackstoryTab from './BackstoryTab';
-import { Box, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Tab, Tabs, Typography, Select, MenuItem, useMediaQuery, useTheme } from '@mui/material';
 
 const CharacterSheetPage: React.FC = () => {
     const { campaign } = useCampaign();
@@ -19,15 +19,17 @@ const CharacterSheetPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(auth.currentUser);
 
+    // 📱 Detect Mobile View
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
     useEffect(() => {
-        // 🔥 Ellenőrizzük, hogy van-e bejelentkezett felhasználó és kampány
         if (!user || !campaign) {
             console.warn("⚠️ Nincs bejelentkezett felhasználó vagy kampány, várunk...");
             const interval = setInterval(() => {
                 setUser(auth.currentUser);
             }, 500);
 
-            // Ha 5 másodperc után sincs user vagy campaign, leállunk
             setTimeout(() => {
                 clearInterval(interval);
                 if (!auth.currentUser || !campaign) {
@@ -41,12 +43,10 @@ const CharacterSheetPage: React.FC = () => {
         console.log("📥 Karakter betöltése Firestore-ból...");
         const charRef = doc(db, 'campaigns', campaign, 'characters', user.uid);
 
-        // 🔥 Firestore snapshot figyelés, valós idejű frissítés
         const unsubscribe = onSnapshot(charRef, async (charSnap) => {
             if (charSnap.exists()) {
                 let characterData = charSnap.data();
 
-                // Ellenőrizzük, hogy van-e `skills` és `savingThrows`
                 let updatedFields: any = {};
                 if (!characterData.skills) updatedFields.skills = defaultCharacter.skills;
                 if (!characterData.savingThrows) updatedFields.savingThrows = defaultCharacter.savingThrows;
@@ -69,6 +69,7 @@ const CharacterSheetPage: React.FC = () => {
         return () => unsubscribe();
     }, [user, campaign]);
 
+    // ✅ Először definiáljuk ezt a függvényt!
     const updateCharacter = async (newData: any) => {
         if (!user || !campaign) {
             console.error("🔥 Hiba: Nem lehet frissíteni a karaktert, nincs bejelentkezett felhasználó vagy kampány!");
@@ -81,6 +82,15 @@ const CharacterSheetPage: React.FC = () => {
         setCharacter((prev) => ({ ...prev, ...newData }));
     };
 
+    // 🔥 A `updateCharacter` függvény MEGFELELŐEN definiálva van, így most már biztonságosan használhatjuk!
+    const tabOptions = [
+        { label: "Statisztikák", component: <StatsTab character={character} onUpdate={updateCharacter} /> },
+        { label: "Inventory", component: <InventoryTab character={character} onUpdate={updateCharacter} /> },
+        { label: "Varázslatok", component: <SpellsTab character={character} onUpdate={updateCharacter} /> },
+        { label: "Képességek", component: <SkillsTab character={character} /> },
+        { label: "Háttértörténet", component: <BackstoryTab character={character} onUpdate={updateCharacter} /> },
+    ];
+
     if (loading) return <Typography sx={{ textAlign: 'center', marginTop: '20px' }}>🔄 Karakter betöltése...</Typography>;
     if (!character) return <Typography sx={{ textAlign: 'center', marginTop: '20px', color: 'red' }}>🔥 Hiba: Nem sikerült betölteni a karaktert!</Typography>;
 
@@ -91,21 +101,31 @@ const CharacterSheetPage: React.FC = () => {
             <Box sx={{ padding: 3 }}>
                 <CharacterHeader character={character} onUpdate={updateCharacter} />
 
-                {/* Lapfülek */}
-                <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
-                    <Tab label="Statisztikák" />
-                    <Tab label="Inventory" />
-                    <Tab label="Varázslatok" />
-                    <Tab label="Képességek" />
-                    <Tab label="Háttértörténet" />
-                </Tabs>
+                {/* Mobilon legördülő menü, asztali nézetben Tabs */}
+                {!isMobile ? (
+                    <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
+                        {tabOptions.map((tab, index) => (
+                            <Tab key={index} label={tab.label} />
+                        ))}
+                    </Tabs>
+                ) : (
+                    <Select
+                        value={activeTab}
+                        onChange={(e) => setActiveTab(Number(e.target.value))}
+                        fullWidth
+                        variant="outlined"
+                        sx={{ backgroundColor: '#222', color: '#fff', marginBottom: 2 }}
+                    >
+                        {tabOptions.map((tab, index) => (
+                            <MenuItem key={index} value={index}>
+                                {tab.label}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                )}
 
-                {/* Tartalom */}
-                {activeTab === 0 && <StatsTab character={character} onUpdate={updateCharacter} />}
-                {activeTab === 1 && <InventoryTab character={character} onUpdate={updateCharacter} />}
-                {activeTab === 2 && <SpellsTab character={character} onUpdate={updateCharacter} />}
-                {activeTab === 3 && <SkillsTab character={character} />}
-                {activeTab === 4 && <BackstoryTab character={character} onUpdate={updateCharacter} />}
+                {/* A kiválasztott fül tartalmának megjelenítése */}
+                {tabOptions[activeTab].component}
             </Box>
         </Box>
     );
