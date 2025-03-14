@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Box, Typography, TextField, Button, Avatar, Switch, Grid, FormControlLabel } from '@mui/material';
+import { Box, Typography, TextField, Button, Avatar, Switch, Grid, FormControlLabel, Checkbox } from '@mui/material';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../../../../shared/utils/firebase';
 
-// 🔥 Alapértelmezett profilkép
 const DEFAULT_PROFILE_PIC = "https://via.placeholder.com/100";
 
 const CharacterHeader: React.FC<{ character: any; onUpdate: (newData: any) => void }> = ({ character, onUpdate }) => {
@@ -9,19 +10,41 @@ const CharacterHeader: React.FC<{ character: any; onUpdate: (newData: any) => vo
     const [editedCharacter, setEditedCharacter] = useState({ ...character });
 
     // 🔥 Ha `deathSaves` nincs, alapértékeket kap
-    const deathSaves = character.deathSaves || { successes: 0, failures: 0 };
+    let deathSaves = character.deathSaves || { successes: [false, false, false], failures: [false, false, false] };
 
-    const handleEditChange = (field: string, value: any) => {
-        setEditedCharacter(prev => ({ ...prev, [field]: value }));
+    // 🔥 Ha a Firestore-ból érkező adatok véletlenül nem tömbök, alakítsuk át azokat tömbökké!
+    if (!Array.isArray(deathSaves.successes)) {
+        deathSaves.successes = [false, false, false];
+    }
+    if (!Array.isArray(deathSaves.failures)) {
+        deathSaves.failures = [false, false, false];
+    }
+
+    // 🔥 Firestore mentés
+    const saveToFirestore = async (updatedCharacter: any) => {
+        if (!character.id) return; // Ha nincs ID, nincs mit menteni
+
+        const charRef = doc(db, "characters", character.id);
+        await updateDoc(charRef, updatedCharacter);
     };
 
-    const toggleHeroicInspiration = () => {
-        setEditedCharacter(prev => ({ ...prev, heroicInspiration: !prev.heroicInspiration }));
+    // 🔥 Heroic Inspiration kapcsoló
+    const toggleHeroicInspiration = async () => {
+        const updatedCharacter = { ...character, heroicInspiration: !character.heroicInspiration };
+        onUpdate(updatedCharacter);
+        saveToFirestore(updatedCharacter);
     };
 
-    const saveChanges = () => {
-        onUpdate(editedCharacter);
-        setEditing(false);
+    // 🔥 Death Saves kezelése
+    const toggleDeathSave = (type: "successes" | "failures", index: number) => {
+        const updatedDeathSaves = {
+            ...deathSaves,
+            [type]: deathSaves[type].map((val: boolean, i: number) => (i === index ? !val : val))
+        };
+
+        const updatedCharacter = { ...character, deathSaves: updatedDeathSaves };
+        onUpdate(updatedCharacter);
+        saveToFirestore(updatedCharacter);
     };
 
     return (
@@ -29,12 +52,12 @@ const CharacterHeader: React.FC<{ character: any; onUpdate: (newData: any) => vo
             sx={{
                 display: 'flex',
                 flexDirection: 'column',
-                backgroundColor: '#333', // 🔥 Sötétebb háttér a jobb kontraszthoz
-                color: '#fff', // 🔥 Fehér szöveg a jobb olvashatóságért
+                backgroundColor: '#333',
+                color: '#fff',
                 padding: '20px',
                 borderRadius: '10px',
                 marginBottom: '15px',
-                boxShadow: '0px 0px 10px rgba(255, 255, 255, 0.2)', // 🔥 Enyhe árnyék
+                boxShadow: '0px 0px 10px rgba(255, 255, 255, 0.2)',
             }}
         >
             {/* 🔥 Profilkép és Heroic Inspiration kapcsoló */}
@@ -45,19 +68,19 @@ const CharacterHeader: React.FC<{ character: any; onUpdate: (newData: any) => vo
                         width: 80,
                         height: 80,
                         border: `4px solid ${character.heroicInspiration ? 'gold' : 'gray'}`,
-                        boxShadow: character.heroicInspiration ? '0px 0px 12px gold' : 'none',
+                        boxShadow: character.heroicInspiration ? '0px 0px 15px gold' : 'none',
                         transition: "all 0.3s",
                     }}
                 />
                 <FormControlLabel
                     control={
                         <Switch
-                            checked={editedCharacter.heroicInspiration || false}
+                            checked={character.heroicInspiration || false}
                             onChange={toggleHeroicInspiration}
                         />
                     }
                     label="Heroic Inspiration"
-                    sx={{ color: '#fff' }} // 🔥 Fehér szöveg a kapcsoló mellett
+                    sx={{ color: '#fff' }}
                 />
             </Box>
 
@@ -72,46 +95,30 @@ const CharacterHeader: React.FC<{ character: any; onUpdate: (newData: any) => vo
                     <Typography sx={{ fontSize: '1rem', marginBottom: '10px' }}><strong>Állapotok:</strong> {character.conditions?.join(", ") || "Nincs"}</Typography>
                     <Typography sx={{ fontSize: '1rem' }}><strong>Háttér:</strong> {character.background} | <strong>Jellem:</strong> {character.alignment}</Typography>
                     <Typography sx={{ fontSize: '1rem', marginBottom: '10px' }}><strong>XP:</strong> {character.xp}</Typography>
-                    <Typography sx={{ fontSize: '1rem' }}>
-                        <strong>Halálmentő dobások:</strong> {deathSaves.successes}/3 siker, {deathSaves.failures}/3 hiba
-                    </Typography>
+
+                    {/* 🔥 Halálmentő dobások – Pipálható rendszer */}
+                    <Typography sx={{ fontSize: '1rem', marginBottom: '10px' }}><strong>Halálmentő dobások:</strong></Typography>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Typography>Sikerek:</Typography>
+                        {deathSaves.successes.map((checked: boolean, index: number) => (
+                            <Checkbox key={index} checked={checked} onChange={() => toggleDeathSave("successes", index)} />
+                        ))}
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Typography>Hibák:</Typography>
+                        {deathSaves.failures.map((checked: boolean, index: number) => (
+                            <Checkbox key={index} checked={checked} onChange={() => toggleDeathSave("failures", index)} />
+                        ))}
+                    </Box>
+
                     <Button onClick={() => setEditing(true)} variant="contained" sx={{ marginTop: '15px' }}>Szerkesztés</Button>
                 </>
             ) : (
-                <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                        <TextField label="Név" value={editedCharacter.name} onChange={(e) => handleEditChange('name', e.target.value)} fullWidth />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <TextField label="Faj" value={editedCharacter.race} onChange={(e) => handleEditChange('race', e.target.value)} fullWidth />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <TextField label="Kaszt" value={editedCharacter.class} onChange={(e) => handleEditChange('class', e.target.value)} fullWidth />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <TextField label="Szint" type="number" value={editedCharacter.level} onChange={(e) => handleEditChange('level', e.target.value)} fullWidth />
-                    </Grid>
-                    <Grid item xs={4}>
-                        <TextField label="Max HP" type="number" value={editedCharacter.maxHp} onChange={(e) => handleEditChange('maxHp', e.target.value)} fullWidth />
-                    </Grid>
-                    <Grid item xs={4}>
-                        <TextField label="Aktuális HP" type="number" value={editedCharacter.hp} onChange={(e) => handleEditChange('hp', e.target.value)} fullWidth />
-                    </Grid>
-                    <Grid item xs={4}>
-                        <TextField label="Temp HP" type="number" value={editedCharacter.tempHp} onChange={(e) => handleEditChange('tempHp', e.target.value)} fullWidth />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <TextField label="AC" type="number" value={editedCharacter.ac} onChange={(e) => handleEditChange('ac', e.target.value)} fullWidth />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <TextField label="Initiative" type="number" value={editedCharacter.initiative} onChange={(e) => handleEditChange('initiative', e.target.value)} fullWidth />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <TextField label="XP" type="number" value={editedCharacter.xp} onChange={(e) => handleEditChange('xp', e.target.value)} fullWidth />
-                    </Grid>
-                    <Button onClick={saveChanges} variant="contained" sx={{ marginTop: '15px' }}>Mentés</Button>
+                <>
+                    <TextField label="Név" value={editedCharacter.name} onChange={(e) => onUpdate({ ...character, name: e.target.value })} fullWidth />
+                    <Button onClick={saveToFirestore} variant="contained" sx={{ marginTop: '15px' }}>Mentés</Button>
                     <Button onClick={() => setEditing(false)} variant="outlined" sx={{ marginTop: '15px', marginLeft: '10px' }}>Mégse</Button>
-                </Grid>
+                </>
             )}
         </Box>
     );

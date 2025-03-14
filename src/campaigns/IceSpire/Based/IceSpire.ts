@@ -1,5 +1,5 @@
 const IceSpireCampaignConfig = {
-    themeStylesheet: './src/campaigns/IceSpire/Based/Icespire.css',
+    themeStylesheet: '../src/campaigns/IceSpire/Based/Icespire.css',
     id: 'icespire',
     name: 'Dragon of Icespire Peak',
     description: 'A jég fagyos csúcsain túl, egy sárkány árnyéka vetül a környező falvakra. A kalandoroknak nemcsak a kegyetlen időjárással, hanem a hegy mélyén szunnyadó titkokkal is meg kell küzdeniük.',
