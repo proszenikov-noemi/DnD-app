@@ -100,14 +100,14 @@ const CharacterHeader: React.FC<{ character: any; onUpdate: (newData: any) => vo
                         <strong>Állapotok:</strong> {character.conditions?.join(", ") || "Nincs"}
                     </Typography>
                     <Typography sx={{ fontSize: '1rem' }}>
-                        <strong>Háttér:</strong> {character.background} | <strong>Jellem:</strong> {character.alignment}
+                        <strong>Background:</strong> {character.background} | <strong>Aligment:</strong> {character.alignment}
                     </Typography>
                     <Typography sx={{ fontSize: '1rem' }}>
                         <strong>XP:</strong> {character.xp}
                     </Typography>
 
                     {/* 🔥 Halálmentő dobások (sikeres és sikertelen pipák) */}
-                    <Typography sx={{ fontSize: '1rem', marginTop: '10px' }}><strong>Halálmentő dobások:</strong></Typography>
+                    <Typography sx={{ fontSize: '1rem', marginTop: '10px' }}><strong>Death saves:</strong></Typography>
                     <Box sx={{ display: 'flex', gap: 2 }}>
                         <Typography>Sikerek:</Typography>
                         {deathSaves.successes.map((checked: boolean, index: number) => (

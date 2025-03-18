@@ -55,7 +55,7 @@ const StatsTab: React.FC<{ character: any; onUpdate: (newData: any) => void }> =
 
     return (
         <Box>
-            <Typography variant="h6">📊 Karakter Statisztikák</Typography>
+            <Typography variant="h6">Karakter Statisztikák</Typography>
 
             {!editing ? (
                 <Grid container spacing={2}>
