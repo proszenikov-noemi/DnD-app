@@ -15,9 +15,12 @@ interface CombatantCardProps {
   hp: number;
   initiative: number;
   maxHp: number;
+  tempHp?: number; // 🔥 Nem kötelező, így ha hiányzik, nem omlik össze az oldal
   ac: number;
   color: string;
 }
+
+
 
 const CombatantCard: React.FC<CombatantCardProps> = ({
   id,
@@ -25,48 +28,67 @@ const CombatantCard: React.FC<CombatantCardProps> = ({
   hp,
   initiative,
   maxHp,
+  tempHp = 0, // Ha nincs értéke, akkor 0 lesz
   ac,
   color,
 }) => {
+  const calculatedMaxHp = maxHp + tempHp; // 🔥 Így már nem lesz undefined hiba
   const [damageInput, setDamageInput] = useState("");
   const [healInput, setHealInput] = useState(""); // Új mező a gyógyításra
 
-  const getHpColor = (hp: number, maxHp: number) => {
-    if (maxHp <= 0) return "#777777";
-    const percentage = (hp / maxHp) * 100;
-    if (percentage > 50) return "#4CAF50";
-    if (percentage > 20) return "#FFA500";
-    if (percentage > 0) return "#FF4444";
-    return "#777777";
-  };
 
-  const handleHpChange = async (amount: number) => {
-    console.log(`🛠️ HP módosítás indítása: ${name}, módosítás: ${amount}`);
+  const getHpColor = (hp: number, maxHp: number, tempHp: number) => {
+    const effectiveMaxHp = maxHp + tempHp; // 🔥 Helyesített maxHp kiszámítása
 
-    try {
-        const combatantRef = doc(db, "combatants", id);
-        const combatantSnap = await getDoc(combatantRef);
+    if (effectiveMaxHp <= 0) return "#777777"; // Ha a max HP 0 vagy kisebb, szürke
 
-        if (combatantSnap.exists()) {
-            const newHp = combatantSnap.data().hp + amount; // Engedjük a negatív értékeket is
+    const percentage = (hp / effectiveMaxHp) * 100;
 
-            // 🔥 Ha a karakter egy játékos hőse, akkor frissítsük a karakterlapját is!
-            if (id.startsWith("custom") || id.length > 10) { // Ha egyéni hős
-                const campaignId = "icespire"; // 🔥 Ezt dinamikusan kellene betölteni!
-                const characterRef = doc(db, "campaigns", campaignId, "characters", id);
-                await updateDoc(characterRef, { hp: newHp });
-                console.log(`✅ Karakterlap HP frissítve: ${newHp}`);
-            }
+    if (percentage > 50) return "#4CAF50";  // Zöld (HP > 50%)
+    if (percentage > 20) return "#FFA500";  // Narancs (HP 20-50% között)
+    if (percentage > 0) return "#FF4444";   // Piros (HP 1-20% között)
 
-            await updateDoc(combatantRef, { hp: newHp });
-            console.log(`✅ HP sikeresen frissítve: ${newHp}`);
-        } else {
-            console.warn(`⚠️ A harcos már nem létezik: ${id}`);
-        }
-    } catch (error) {
-        console.error("❌ Hiba a HP frissítés közben:", error);
-    }
+    return "#777777"; // Szürke, ha a karakter 0 HP-n van (tehát "meghalt")
 };
+
+
+const handleHpChange = async (amount: number) => {
+  console.log(`🛠️ HP módosítás indítása: ${name}, módosítás: ${amount}`);
+
+  try {
+      const combatantRef = doc(db, "combatants", id);
+      const combatantSnap = await getDoc(combatantRef);
+
+      if (combatantSnap.exists()) {
+          const currentData = combatantSnap.data();
+          const tempHp = currentData.tempHp ?? 0; // 🔥 Temp HP, ha nincs, akkor 0
+          const newHp = currentData.hp + amount;  // HP módosítás
+          const effectiveMaxHp = currentData.maxHp;  // 🔥 Nem növeljük a maxHp-t minden egyes alkalommal!
+
+          // Frissítjük az adatokat, de NEM adunk hozzá extra tempHp-t minden alkalommal!
+          await updateDoc(combatantRef, { hp: newHp });
+
+          // 🔥 Ha a karakter egy játékos hőse, akkor frissítsük a karakterlapját is!
+          if (id.startsWith("custom") || id.length > 10) {
+              const campaignId = "icespire"; // 🔥 Ezt dinamikusan kellene betölteni!
+              const characterRef = doc(db, "campaigns", campaignId, "characters", id);
+              await updateDoc(characterRef, { hp: newHp });
+              console.log(`✅ Karakterlap HP frissítve: ${newHp}`);
+          }
+
+          console.log(`✅ HP sikeresen frissítve: ${newHp}`);
+      } else {
+          console.warn(`⚠️ A harcos már nem létezik: ${id}`);
+      }
+  } catch (error) {
+      console.error("❌ Hiba a HP frissítés közben:", error);
+  }
+};
+
+
+
+
+
 
   const handleDamageSubmit = async () => {
     const damage = parseInt(damageInput, 10);
@@ -118,6 +140,8 @@ const handleDelete = async () => {
   }
 };
 
+
+
   return (
     <Paper
       elevation={4}
@@ -146,18 +170,19 @@ const handleDelete = async () => {
         </IconButton>
 
         <Typography
-          variant="h5"
-          sx={{
+           variant="h5"
+           sx={{
             fontWeight: "bold",
             color: "#fff",
-            backgroundColor: getHpColor(hp, maxHp),
+            backgroundColor: getHpColor(hp, maxHp, tempHp),
             padding: "6px 12px",
             borderRadius: "6px",
             minWidth: "50px",
-          }}
+        }}
         >
-          {hp}
+        {hp}
         </Typography>
+
 
         <IconButton onClick={() => handleHpChange(-1)} sx={{ color: "#FF4444" }}>
           <KeyboardArrowDownIcon fontSize="large" />

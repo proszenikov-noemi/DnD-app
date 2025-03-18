@@ -54,6 +54,7 @@ const HeroesTab: React.FC<{ onAddHero: (hero: any) => void }> = ({ onAddHero }) 
                 ac: Number(newHero.ac),        // 🔥 Most már mindig szám lesz!
                 hp: Number(newHero.hp),        // 🔥 Most már mindig szám lesz!
                 maxHp: Number(newHero.maxHp),  // 🔥 Most már mindig szám lesz!
+                tempHp: Number (newHero.tempHp),
                 initiative: parseInt(newHero.initiative, 10)
             };
         } else {
@@ -65,6 +66,7 @@ const HeroesTab: React.FC<{ onAddHero: (hero: any) => void }> = ({ onAddHero }) 
                     ac: Number(selectedHero.ac),        // 🔥 Most már mindig szám lesz!
                     hp: Number(selectedHero.hp),        // 🔥 Most már mindig szám lesz!
                     maxHp: Number(selectedHero.maxHp),  // 🔥 Most már mindig szám lesz!
+                    tempHp: Number(selectedHero.tempHp),
                     initiative: parseInt(newHero.initiative, 10)
                 };
             }

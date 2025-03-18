@@ -45,6 +45,8 @@ const CharacterHeader: React.FC<{ character: any; onUpdate: (newData: any) => vo
         setEditing(false);
     };
 
+    const calculatedMaxHp = (character.tempHp ? Number(character.maxHp) + Number(character.tempHp) : Number(character.maxHp));
+
     return (
         <Box
             sx={{
@@ -91,7 +93,7 @@ const CharacterHeader: React.FC<{ character: any; onUpdate: (newData: any) => vo
                     <Typography variant="h4" sx={{ fontWeight: 'bold', marginTop: '10px' }}>{character.name}</Typography>
                     <Typography sx={{ fontSize: '1.1rem' }}>{character.race} - {character.class} (Szint {character.level})</Typography>
                     <Typography sx={{ fontSize: '1rem' }}>
-                        <strong>HP:</strong> {character.hp} / {character.maxHp} (Temp: {character.tempHp})
+                       <strong>HP:</strong> {character.hp} / {calculatedMaxHp} (Temp: {character.tempHp})
                     </Typography>
                     <Typography sx={{ fontSize: '1rem' }}>
                         <strong>AC:</strong> {character.ac} | <strong>Initiative:</strong> {character.initiative}

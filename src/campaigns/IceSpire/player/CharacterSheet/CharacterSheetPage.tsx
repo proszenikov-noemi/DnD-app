@@ -57,7 +57,14 @@ const CharacterSheetPage: React.FC = () => {
                 }
 
                 console.log("✅ Karakter betöltve:", characterData);
-                setCharacter(characterData);
+                
+                const updatedCharacterData = {
+                    ...characterData,
+                    mxHp: characterData.tempHp ? Number(characterData.maxHp) + Number(characterData.tempHp) : Number(characterData.maxHp),
+                };
+                
+                setCharacter(updatedCharacterData);
+                
             } else {
                 console.warn("⚠️ Nincs még karakter Firestore-ban, létrehozunk egyet...");
                 await setDoc(charRef, defaultCharacter);

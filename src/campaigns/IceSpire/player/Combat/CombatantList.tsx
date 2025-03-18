@@ -8,6 +8,7 @@ interface Combatant {
   initiative: number;
   hp: number;
   maxHp: number;
+  tempHp: number;  // 🔥 Hozzáadva a tempHp mező
   ac: number;
   color: string;
 }
@@ -31,7 +32,8 @@ const CombatantList: React.FC<CombatantListProps> = ({ combatants }) => {
         .filter((c) => c.initiative !== undefined) // 🔥 Ha nincs initiative, kiszűrjük
         .sort((a, b) => Number(b.initiative) - Number(a.initiative)) // 📌 Csökkenő sorrend
         .map((combatant) => (
-          <CombatantCard key={combatant.id} {...combatant} />
+          <CombatantCard key={combatant.id} {...combatant} tempHp={combatant.tempHp ?? 0} />
+
         ))}
     </Box>
   );
