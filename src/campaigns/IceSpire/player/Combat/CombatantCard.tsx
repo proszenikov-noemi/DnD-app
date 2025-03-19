@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { Box, Typography, IconButton, TextField, Paper } from "@mui/material";
+import { Box, Typography, IconButton, TextField, Paper, Select, MenuItem, Button, Tooltip } from "@mui/material";
 import KeyboardArrowUpIcon from "@mui/icons-material/ArrowDropUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/ArrowDropDown";
 import ShieldIcon from "@mui/icons-material/Shield";
 import SportsMmaIcon from "@mui/icons-material/SportsMma";
-import HealingIcon from "@mui/icons-material/LocalHospital";  // Gyógyítás ikon
+import HealingIcon from "@mui/icons-material/LocalHospital";
 import DeleteIcon from "@mui/icons-material/Delete";
+import BlockIcon from "@mui/icons-material/Block"; // Alapértelmezett ikon
 import { collection, getDocs, getDoc, doc, deleteDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../shared/utils/firebase";
 
@@ -15,12 +16,11 @@ interface CombatantCardProps {
   hp: number;
   initiative: number;
   maxHp: number;
-  tempHp?: number; // 🔥 Nem kötelező, így ha hiányzik, nem omlik össze az oldal
+  tempHp?: number;
   ac: number;
   color: string;
+  conditions: string[];
 }
-
-
 
 const CombatantCard: React.FC<CombatantCardProps> = ({
   id,
@@ -28,13 +28,44 @@ const CombatantCard: React.FC<CombatantCardProps> = ({
   hp,
   initiative,
   maxHp,
-  tempHp = 0, // Ha nincs értéke, akkor 0 lesz
+  tempHp = 0,
   ac,
   color,
+  conditions = [],
 }) => {
-  const calculatedMaxHp = maxHp + tempHp; // 🔥 Így már nem lesz undefined hiba
+  const calculatedMaxHp = maxHp + tempHp;
   const [damageInput, setDamageInput] = useState("");
-  const [healInput, setHealInput] = useState(""); // Új mező a gyógyításra
+  const [healInput, setHealInput] = useState("");
+  const [selectedCondition, setSelectedCondition] = useState("");
+  const [combatantConditions, setCombatantConditions] = useState<string[]>(conditions);
+
+
+  // 📌 D&D 2024 állapotok
+  const DND_CONDITIONS = [
+    "Blinded", "Charmed", "Deafened", "Exhaustion", "Frightened",
+    "Grapped", "Incapacitated", "Invisible", "Paralyzed", "Petrified", 
+    "Poisoned", "Proned", "Restrained", "Stunned", "Unconscious"
+  ];
+
+  // Állapot ikonok hozzárendelése
+  const DND_CONDITION_ICONS: { [key: string]: string } = {
+    "Blinded": "/icons/hidden.png",
+    "Charmed": "/icons/heart.png",
+    "Deafened": "/icons/deaf.png",
+    "Exhaustion": "/icons/tired.png",
+    "Frightened": "/icons/scared.png",
+    "Grapped": "/icons/jiu-jitsu.png",
+    "Incapacitated": "/icons/disorder.png",
+    "Invisible": "/icons/invisible-man.png",
+    "Paralyzed": "/icons/stroke.png",
+    "Petrified": "/icons/rocks.png",
+    "Poisoned": "/icons/poison.png",
+    "Proned": "/icons/prone.png",
+    "Restrained": "/icons/tie-up.png",
+    "Stunned": "/icons/stunned.png",
+    "Unconscious": "/icons/man.png",
+  };
+  
 
 
   const getHpColor = (hp: number, maxHp: number, tempHp: number) => {
@@ -84,11 +115,6 @@ const handleHpChange = async (amount: number) => {
       console.error("❌ Hiba a HP frissítés közben:", error);
   }
 };
-
-
-
-
-
 
   const handleDamageSubmit = async () => {
     const damage = parseInt(damageInput, 10);
@@ -140,7 +166,35 @@ const handleDelete = async () => {
   }
 };
 
+// 📌 Állapot hozzáadása
+const handleAddCondition = async () => {
+  if (!selectedCondition || combatantConditions.includes(selectedCondition)) return;
 
+  const updatedConditions = [...combatantConditions, selectedCondition];
+
+  try {
+    const combatantRef = doc(db, "combatants", id);
+    await updateDoc(combatantRef, { conditions: updatedConditions });
+
+    setCombatantConditions(updatedConditions);
+    setSelectedCondition("");
+  } catch (error) {
+    console.error("❌ Hiba az állapot frissítése közben:", error);
+  }
+};
+
+const handleRemoveCondition = async (condition: string) => {
+  const updatedConditions = combatantConditions.filter(c => c !== condition);
+
+  try {
+    const combatantRef = doc(db, "combatants", id);
+    await updateDoc(combatantRef, { conditions: updatedConditions });
+
+    setCombatantConditions(updatedConditions);
+  } catch (error) {
+    console.error("❌ Hiba az állapot eltávolítása közben:", error);
+  }
+};
 
   return (
     <Paper
@@ -164,6 +218,21 @@ const handleDelete = async () => {
         {initiative} - {name}
       </Typography>
 
+      {/* Állapot ikonok megjelenítése a név alatt */}
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 1, marginTop: 1 }}>
+        {combatantConditions.map((condition) => (
+          <Tooltip key={condition} title={condition}>
+            <IconButton onClick={() => handleRemoveCondition(condition)} sx={{ padding: 0 }}>
+              <img 
+                src={DND_CONDITION_ICONS[condition] || "/icons/default.png"} 
+                alt={condition} 
+                style={{ width: "24px", height: "24px" }}
+              />
+            </IconButton>
+          </Tooltip>
+        ))}
+      </Box>
+
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 2, marginTop: 2 }}>
         <IconButton onClick={() => handleHpChange(1)} sx={{ color: "#4CAF50" }}>
           <KeyboardArrowUpIcon fontSize="large" />
@@ -182,6 +251,7 @@ const handleDelete = async () => {
         >
         {hp}
         </Typography>
+
 
 
         <IconButton onClick={() => handleHpChange(-1)} sx={{ color: "#FF4444" }}>
@@ -223,6 +293,32 @@ const handleDelete = async () => {
           <HealingIcon />
         </IconButton>
       </Box>
+
+            {/* Állapotok kezelése */}
+            <Box sx={{ marginTop: 2 }}>
+        <Typography variant="h6">Állapotok kezelése</Typography>
+        <Select
+          value={selectedCondition}
+          onChange={(e) => setSelectedCondition(e.target.value)}
+          displayEmpty
+          sx={{ width: "100%", backgroundColor: "#ddd", borderRadius: 1, padding: "5px" }}
+        >
+          <MenuItem value="" disabled>Válassz állapotot...</MenuItem>
+          {DND_CONDITIONS.map((condition) => (
+            <MenuItem key={condition} value={condition}>
+              <img 
+                src={DND_CONDITION_ICONS[condition] || "/icons/default.png"} 
+                alt={condition} 
+                style={{ width: "16px", height: "16px", marginRight: "8px" }}
+              />
+              {condition}
+            </MenuItem>
+          ))}
+        </Select>
+        <Button onClick={handleAddCondition} sx={{ marginTop: 1, backgroundColor: "#4CAF50", color: "white" }}>Hozzáadás</Button>
+      </Box>
+
+
     </Paper>
   );
 };
